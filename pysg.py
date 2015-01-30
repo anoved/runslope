@@ -18,6 +18,7 @@ config = {
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS
 data = []
+racekeys = []
 
 # convert elapsed time string (eg, "H:MM:SS.S") to seconds
 def seconds(elapsed):
@@ -34,6 +35,8 @@ with open('freeze.csv', 'rb') as f:
 	reader = csv.DictReader(f)
 	for row in reader:
 		row['SECONDS'] = seconds(row['TIME'])
+		if row['RACE'] not in racekeys:
+			racekeys.append(row['RACE'])
 		data.append(row)
 
 # optionally take only those that are present for all races (hardcoded == 4 hack)
@@ -46,13 +49,6 @@ data.sort(key=lambda row: row['SECONDS'])
 mins = data[0]['SECONDS']
 maxs = data[-1]['SECONDS']
 srange = maxs - mins
-
-# unique race ids
-racekeys = []
-
-for i in range(1, len(data)):
-	if data[i]['RACE'] not in racekeys:
-		racekeys.append(data[i]['RACE'])
 
 # next, sort by RACE, then SECONDS, then NAME (basically, restore input format)
 # could probably sort and filter at once with one list expression...
