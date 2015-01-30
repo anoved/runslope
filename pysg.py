@@ -52,10 +52,9 @@ if config['cutoff'] != None:
 	cutoff = seconds(config['cutoff'])
 	data = filter(lambda q: q['SECONDS'] <= cutoff, data)
 
-# sort all results by time to determine range
-data.sort(key=lambda row: row['SECONDS'])
-mins = data[0]['SECONDS']
-maxs = data[-1]['SECONDS']
+# determine range of times
+mins = min(data, key=lambda q: q['SECONDS'])['SECONDS']
+maxs = max(data, key=lambda q: q['SECONDS'])['SECONDS']
 
 # next, sort by RACE, then SECONDS, then NAME (basically, restore input format)
 # could probably sort and filter at once with one list expression...
