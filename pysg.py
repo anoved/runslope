@@ -106,11 +106,22 @@ svg_fadeline = StyleBuilder()
 svg_fadeline.setStrokeWidth(0.5)
 svg_fadeline.setStroke('#ddd')
 
+svg_scalestyle = StyleBuilder()
+svg_scalestyle.setStrokeWidth(4)
+svg_scalestyle.setStroke('#eed')
+
+svg_labels = g()
+svg_labels.set_style(svg_style.getStyle())
+svg_labels.setAttribute('xml:space', 'preserve')
+
 svg_llines = g()
 svg_llines.set_style(svg_linkline.getStyle())
 
 svg_flines = g()
 svg_flines.set_style(svg_fadeline.getStyle())
+
+svg_scale = g()
+svg_scale.set_style(svg_scalestyle.getStyle())
 
 # could have a master label group that contains each race group
 
@@ -121,11 +132,14 @@ for r in range(0, len(races)):
 	races[r]['xr'] = races[r]['xl'] + 0.666 * (races[r]['wmax_label'] * config['fontsize'])
 	# max label char count * font size seems a poor estimate of actual label width
 	# - it's about 1.5 times larger than actual rendered label width.
+	# experiment with http://www.w3.org/TR/SVG/text.html#TextElementTextLengthAttribute
+	#  to specify *intended* label width, and see if the browser/layout engine
+	#  will automatically fudge the text dimensions satisfactorily for alignment
 	
 	# label group
 	svg_lgroup = g()
-	svg_lgroup.set_style(svg_style.getStyle())
-	svg_lgroup.setAttribute("xml:space", "preserve")
+	#svg_lgroup.set_style(svg_style.getStyle())
+	#svg_lgroup.setAttribute("xml:space", "preserve")
 	
 	for i in range(0, len(races[r]['results'])):
 		
@@ -150,7 +164,7 @@ for r in range(0, len(races)):
 				m = matches[0]
 				#print (p, m['y'])
 				
-				svg_link = line(races[p]['xr']-5,	m['y']-3,	races[r]['xl']+5, y-3)
+				svg_link = line(races[p]['xr']-5, m['y']-3, races[r]['xl']+5, y-3)
 				
 				if p == r - 1:
 					svg_llines.addElement(svg_link)
@@ -165,10 +179,15 @@ for r in range(0, len(races)):
 				
 				break
 	
-	svg_file.addElement(svg_lgroup)
+	svg_labels.addElement(svg_lgroup)
 
-svg_file.addElement(svg_llines)
+# scale gen. start with first minute before min result time
+
+
+svg_file.addElement(svg_scale)
 svg_file.addElement(svg_flines)
+svg_file.addElement(svg_llines)
+svg_file.addElement(svg_labels)
 svg_file.save('./test.svg')
 
 
