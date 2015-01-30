@@ -47,23 +47,12 @@ mins = data[0]['SECONDS']
 maxs = data[-1]['SECONDS']
 srange = maxs - mins
 
-# min and max deltas between neighborhing values
-mind = srange
-maxd = 0
-
 # unique race ids
 racekeys = []
 
 for i in range(1, len(data)):
 	if data[i]['RACE'] not in racekeys:
 		racekeys.append(data[i]['RACE'])
-	diff = abs(data[i]['SECONDS'] - data[i-1]['SECONDS'])
-	if diff != 0:
-		if diff < mind:
-			mind = diff
-		if diff > maxd:
-			maxd = diff
-
 
 # next, sort by RACE, then SECONDS, then NAME (basically, restore input format)
 # could probably sort and filter at once with one list expression...
