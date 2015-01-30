@@ -3,12 +3,17 @@
 import csv
 import re
 
+from pysvg.shape import *
+
+from pysvg.structure import *
+from pysvg.style import *
+from pysvg.text import *
+from pysvg.builders import StyleBuilder
 
 config = {
-	'vscale': 1,
+	'vscale': 2,
 	'fontsize': 9,
-	'linespan': 50,
-	'margin': 10
+	'linespan': 120
 }
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS
@@ -63,7 +68,7 @@ data.sort(key=lambda rec: (rec['RACE'], rec['SECONDS'], rec['NAME']))
 races = []
 for key in sorted(racekeys):
 	results = filter(lambda result: result['RACE'] == key, data)
-	
+		
 	for n in range(0, len(results)):
 		results[n]['RANK'] = n + 1
 	
@@ -85,37 +90,72 @@ for key in sorted(racekeys):
 	})
 
 
+svg_file = svg()
+
+# label styles
+svg_style = StyleBuilder()
+svg_style.setFontFamily(fontfamily="monospace")
+svg_style.setFontSize('9px')
+svg_style.setFilling(fill='gray')
+
+svg_linkline = StyleBuilder()
+svg_linkline.setStrokeWidth(1)
+svg_linkline.setStroke('#ccc')
+
+svg_fadeline = StyleBuilder()
+svg_fadeline.setStrokeWidth(0.5)
+svg_fadeline.setStroke('#ddd')
+
+svg_llines = g()
+svg_llines.set_style(svg_linkline.getStyle())
+
+svg_flines = g()
+svg_flines.set_style(svg_fadeline.getStyle())
+
+# could have a master label group that contains each race group
+
 for r in range(0, len(races)):
 	
 	# left and right positions of race results - could calc in earlier loop
-	races[r]['xl'] = (
-		config['margin']
-		+ (r * config['linespan'])
-		+ sum([(races[pr]['wmax_label'] * config['fontsize']) for pr in range(0, r - 1)])
-	)
-	races[r]['xr'] = races[r]['xl'] + (races[r]['wmax_label'] * config['fontsize'])
+	races[r]['xl'] = (races[r-1]['xr'] + config['linespan'] if r > 0 else 0)
+	races[r]['xr'] = races[r]['xl'] + 0.666 * (races[r]['wmax_label'] * config['fontsize'])
+	# max label char count * font size seems a poor estimate of actual label width
+	# - it's about 1.5 times larger than actual rendered label width.
+	
+	# label group
+	svg_lgroup = g()
+	svg_lgroup.set_style(svg_style.getStyle())
+	svg_lgroup.setAttribute("xml:space", "preserve")
 	
 	for i in range(0, len(races[r]['results'])):
+		
 		rec = races[r]['results'][i]
 		label =  races[r]['label_format'] % (rec['RANK'], rec['NAME'], rec['TIME'])
 		
 		# value we have to position
-		v = rec['SECONDS'] - mins
-		y = config['margin'] + v
-		
+		y = rec['SECONDS'] - mins
 		races[r]['results'][i]['y'] = y
 		
-		print (label, y)
+		# draw result label
+		svg_label = text(label, races[r]['xl'], y)
+		svg_lgroup.addElement(svg_label)
 		
-		# draw label at (xl, y)
-		
+		# and p == r to limit to one level
+		# (or p >= r-1 to limit to two levels, etc)
 		p = r
 		while p > 0:
 			p -= 1
 			matches = filter(lambda cand: cand['NAME'] == rec['NAME'], races[p]['results'])
 			if len(matches) == 1:
 				m = matches[0]
-				print (p, m['y'])
+				#print (p, m['y'])
+				
+				svg_link = line(races[p]['xr']-5,	m['y']-3,	races[r]['xl']+5, y-3)
+				
+				if p == r - 1:
+					svg_llines.addElement(svg_link)
+				else:
+					svg_flines.addElement(svg_link)
 				
 				# draw link from
 				# (races[p][xr], m[y]) to (races[r][xl], y)
@@ -124,8 +164,12 @@ for r in range(0, len(races)):
 				# if p < r-1, this is a different category.
 				
 				break
+	
+	svg_file.addElement(svg_lgroup)
 
-
+svg_file.addElement(svg_llines)
+svg_file.addElement(svg_flines)
+svg_file.save('./test.svg')
 
 
 #for i in range(0, len(data)-1):
