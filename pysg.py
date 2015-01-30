@@ -15,7 +15,8 @@ config = {
 	'linespan': 120,
 	'minvgap': 7,
 	'nohooky': False,
-	'scalebars': True
+	'scalebars': True,
+	'cutoff': None
 }
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS
@@ -45,6 +46,11 @@ with open('freeze.csv', 'rb') as f:
 # (retain record q if there are as many records w/that name as unique racekeys)
 if config['nohooky']:
 	data = filter(lambda q: len(filter(lambda k: k['NAME'] == q['NAME'], data)) == len(racekeys), data)
+
+# discard results slower than cutoff time, if defined ("H:MM:SS" format)
+if config['cutoff'] != None:
+	cutoff = seconds(config['cutoff'])
+	data = filter(lambda q: q['SECONDS'] <= cutoff, data)
 
 # sort all results by time to determine range
 data.sort(key=lambda row: row['SECONDS'])
