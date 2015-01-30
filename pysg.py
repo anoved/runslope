@@ -13,7 +13,9 @@ config = {
 	'vscale': 1.25,
 	'fontsize': 9,
 	'linespan': 120,
-	'minvgap': 7
+	'minvgap': 7,
+	'nohooky': False,
+	'scalebars': True
 }
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS
@@ -39,16 +41,15 @@ with open('freeze.csv', 'rb') as f:
 			racekeys.append(row['RACE'])
 		data.append(row)
 
-# optionally take only those that are present for all races (hardcoded == 4 hack)
-#data = filter(lambda q: len(filter(lambda k: k['NAME'] == q['NAME'], data)) == 4, data)
+# optionally take only those that are present for all races
+# (retain record q if there are as many records w/that name as unique racekeys)
+if config['nohooky']:
+	data = filter(lambda q: len(filter(lambda k: k['NAME'] == q['NAME'], data)) == len(racekeys), data)
 
-# first, sort by time for bounds checking
+# sort all results by time to determine range
 data.sort(key=lambda row: row['SECONDS'])
-
-# min and max second value
 mins = data[0]['SECONDS']
 maxs = data[-1]['SECONDS']
-srange = maxs - mins
 
 # next, sort by RACE, then SECONDS, then NAME (basically, restore input format)
 # could probably sort and filter at once with one list expression...
@@ -83,7 +84,7 @@ svg_file = svg()
 svg_style = StyleBuilder()
 svg_style.setFontFamily(fontfamily="monospace")
 svg_style.setFontSize('9px')
-svg_style.setFilling(fill='gray')
+svg_style.setFilling(fill='black')
 
 svg_linkline = StyleBuilder()
 svg_linkline.setStrokeWidth(1)
@@ -92,10 +93,6 @@ svg_linkline.setStroke('#ccc')
 svg_fadeline = StyleBuilder()
 svg_fadeline.setStrokeWidth(0.5)
 svg_fadeline.setStroke('#ddd')
-
-svg_scalestyle = StyleBuilder()
-svg_scalestyle.setStrokeWidth(6)
-svg_scalestyle.setStroke('#eef')
 
 svg_labels = g()
 svg_labels.set_style(svg_style.getStyle())
@@ -106,9 +103,6 @@ svg_llines.set_style(svg_linkline.getStyle())
 
 svg_flines = g()
 svg_flines.set_style(svg_fadeline.getStyle())
-
-svg_scale = g()
-svg_scale.set_style(svg_scalestyle.getStyle())
 
 for r in range(0, len(races)):
 	
@@ -169,14 +163,20 @@ for r in range(0, len(races)):
 	svg_labels.addElement(svg_lgroup)
 
 # scale bars every minute from before first to after last finisher
-start_s = (int(mins)/60) * 60
-end_s = 120 + ((int(maxs)/60) * 60)
-for s in range(start_s, end_s, 60):
-	y = config['vscale'] * (s - mins)
-	scaleline = line(0, y, races[-1]['xr'], y)
-	svg_scale.addElement(scaleline)
+if config['scalebars']:
+	svg_scalestyle = StyleBuilder()
+	svg_scalestyle.setStrokeWidth(6)
+	svg_scalestyle.setStroke('#eef')
+	svg_scale = g()
+	svg_scale.set_style(svg_scalestyle.getStyle())
+	start_s = (int(mins)/60) * 60
+	end_s = 120 + ((int(maxs)/60) * 60)
+	for s in range(start_s, end_s, 60):
+		y = config['vscale'] * (s - mins)
+		scaleline = line(0, y, races[-1]['xr'], y)
+		svg_scale.addElement(scaleline)
+	svg_file.addElement(svg_scale)
 
-svg_file.addElement(svg_scale)
 svg_file.addElement(svg_flines)
 svg_file.addElement(svg_llines)
 svg_file.addElement(svg_labels)
