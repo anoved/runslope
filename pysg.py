@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import sys
 import csv
 import re
 
@@ -36,13 +37,12 @@ def seconds(elapsed):
 	return seconds
 
 # read results table into data list
-with open('freeze.csv', 'rb') as f:
-	reader = csv.DictReader(f)
-	for row in reader:
-		row['SECONDS'] = seconds(row['TIME'])
-		if row['RACE'] not in racekeys:
-			racekeys.append(row['RACE'])
-		data.append(row)
+reader = csv.DictReader(sys.stdin)
+for row in reader:
+	row['SECONDS'] = seconds(row['TIME'])
+	if row['RACE'] not in racekeys:
+		racekeys.append(row['RACE'])
+	data.append(row)
 
 # optionally take only those that are present for all races
 # (retain record q if there are as many records w/that name as unique racekeys)
@@ -199,5 +199,4 @@ if config['scalebars']:
 svg_file.addElement(svg_flines)
 svg_file.addElement(svg_llines)
 svg_file.addElement(svg_labels)
-svg_file.save('./test.svg')
-
+print svg_file.getXML()
