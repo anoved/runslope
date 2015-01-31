@@ -18,7 +18,7 @@ config = {
 	'nohooky': False,
 	'scalebars': True,
 	'cutoff': '1:30:00',
-	'alllinks': True,
+	'alllinks': False,
 	'curvy': 50
 }
 
@@ -35,6 +35,17 @@ def seconds(elapsed):
 		if m.group(1) != None:
 			seconds += float(m.group(1)) * 60 * 60
 	return seconds
+
+def time(seconds):
+	h = int(seconds) / 3600
+	seconds -= h * 3600
+	m = int(seconds) / 60
+	seconds -= m * 60
+	if (h > 0):
+		return "%d:%02d:%02d" % (h, m, seconds)
+	elif m > 0:
+		return "%4d:%02d" % (m, seconds)
+	return "%2d" % seconds
 
 # read results table into data list
 reader = csv.DictReader(sys.stdin)
@@ -95,7 +106,7 @@ svg_style.setFilling(fill='black')
 
 svg_linkline = StyleBuilder()
 svg_linkline.setStrokeWidth(1)
-svg_linkline.setStroke('#ccc')
+svg_linkline.setStroke('#bbb')
 
 svg_fadeline = StyleBuilder()
 svg_fadeline.setStrokeWidth(1)
@@ -207,13 +218,14 @@ def Scalebars(smin, smax, xmin, xmax):
 	g_scale_times = g()
 	g_scale_lines.set_style(c_lines.getStyle())
 	g_scale_times.set_style(c_times.getStyle())
+	g_scale_times.setAttribute('xml:space', 'preserve')
 	
 	start = (int(smin) / 60) * 60
 	end = 120 + ((int(smax) / 60) * 60)
 	for s in range(start, end, 60):
 		y = config['vscale'] * (s - smin)
 		sline = line(xmin, y, xmax, y)
-		stime = text(str(s), xmax + 3, y + 7)
+		stime = text(time(s), xmax, y + 6)
 		g_scale_lines.addElement(sline)
 		g_scale_times.addElement(stime)
 	
