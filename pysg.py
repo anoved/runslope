@@ -11,15 +11,16 @@ from pysvg.text import *
 from pysvg.builders import StyleBuilder
 
 config = {
-	'vscale': 1.5,
+	'vscale': 1.8,
 	'fontsize': 9,
-	'linespan': 150,
-	'minvgap': 9,
+	'linespan': 200,
+	'minvgap': 11,
 	'nohooky': False,
 	'scalebars': True,
 	'cutoff': '1:30:00',
-	'alllinks': False,
-	'curvy': 50
+	'alllinks': True,
+	'curvy': 0,
+	'decollide': True
 }
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS
@@ -143,7 +144,7 @@ for r in range(0, len(races)):
 		y = config['vscale'] * (rec['SECONDS'] - mins)
 		
 		# push collisions downward
-		if i > 0 and y - races[r]['results'][i-1]['y'] < config['minvgap']:
+		if config['decollide'] and i > 0 and y - races[r]['results'][i-1]['y'] < config['minvgap']:
 			y = races[r]['results'][i-1]['y'] + config['minvgap']
 		
 		races[r]['results'][i]['y'] = y
