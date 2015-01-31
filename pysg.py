@@ -11,16 +11,40 @@ from pysvg.text import *
 from pysvg.builders import StyleBuilder
 
 config = {
+	
+	# Y value scaling. 1 is one vertical pixel per second.
 	'vscale': 1.8,
+	
+	# Fixed with font pixel size
 	'fontsize': 9,
-	'linespan': 200,
-	'minvgap': 11,
-	'nohooky': False,
-	'scalebars': True,
-	'cutoff': '1:30:00',
-	'alllinks': True,
-	'curvy': 0,
+	
+	# Resolve collisions (overlapping labels) by pushing later results down
 	'decollide': True,
+	
+	# Minimum allowable y gap if decollide is enabled (options could be merged)
+	'minvgap': 11,
+	
+	# Pixel spacing between columns
+	'linespan': 200,
+	
+	# If true, omit all results for names that did not attend all races
+	'nohooky': False,
+	
+	# If true, create reference lines and label marking every minute
+	'scalebars': True,
+	
+	# If not None, omit results slower than stated H:MM:SS time
+	'cutoff': '1:30:00',
+	
+	# If true, link results even if the runner skipped intervening races
+	# If false, links will only be drawn between consecutive races
+	'alllinks': True,
+	
+	# If 0, links will be drawn as straight lines. Otherwise, gives horizontal
+	# offset of control points from end points for drawing cubic Bezier curves.
+	'curvy': 0,
+	
+	# If true, linked labels will be underlined, forming continuous lines
 	'underline': False
 }
 
