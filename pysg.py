@@ -10,13 +10,14 @@ from pysvg.text import *
 from pysvg.builders import StyleBuilder
 
 config = {
-	'vscale': 1.25,
+	'vscale': 2,
 	'fontsize': 9,
-	'linespan': 120,
-	'minvgap': 7,
+	'linespan': 180,
+	'minvgap': 9,
 	'nohooky': False,
 	'scalebars': True,
-	'cutoff': None
+	'cutoff': '1:30:00',
+	'alllinks': False
 }
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS
@@ -137,12 +138,19 @@ for r in range(0, len(races)):
 		
 		# draw result label
 		label =  races[r]['label_format'] % (rec['RANK'], rec['NAME'], rec['TIME'])
-		svg_label = text(label, races[r]['xl'], y)
+		svg_label = text(label, races[r]['xl'], y-1)
 		svg_lgroup.addElement(svg_label)
+		
+		underline = line(races[r]['xl'], y, races[r]['xr'], y)
+		svg_llines.addElement(underline)
 		
 		p = r
 		while p > 0:
 			p -= 1
+			
+			# don't look for name links in earlier races if not requested
+			if (not config['alllinks']) and (p < r - 1):
+				break
 			
 			# look for results with the same name in this previous race
 			matches = filter(lambda cand: cand['NAME'] == rec['NAME'], races[p]['results'])
@@ -150,11 +158,8 @@ for r in range(0, len(races)):
 			# if a match is found, draw a link and stop looking for matches
 			if len(matches) == 1:
 				
-				svg_link = line(
-					races[p]['xr'] - 5,
-					matches[0]['y'] - 3,
-					races[r]['xl'] + 5,
-					y - 3)
+				# y - 3
+				svg_link = line(races[p]['xr'], matches[0]['y'], races[r]['xl'], y)
 				
 				if p == r - 1:
 					# links to the immediately previous race are emphasized
