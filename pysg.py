@@ -13,16 +13,13 @@ from pysvg.builders import StyleBuilder
 config = {
 	
 	# Y value scaling. 1 is one vertical pixel per second.
-	'vscale': 1.8,
+	'vscale': 2,
 	
 	# Fixed with font pixel size
 	'fontsize': 9,
 	
-	# Resolve collisions (overlapping labels) by pushing later results down
-	'decollide': True,
-	
-	# Minimum allowable y gap if decollide is enabled (options could be merged)
-	'minvgap': 11,
+	# Minimum allowable y overlap. If >0, overlapping labels are pushed down.
+	'overlap': 10,
 	
 	# Pixel spacing between columns
 	'linespan': 200,
@@ -45,7 +42,7 @@ config = {
 	'curvy': 0,
 	
 	# If true, linked labels will be underlined, forming continuous lines
-	'underline': False
+	'underline': True
 }
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS
@@ -169,8 +166,8 @@ for r in range(0, len(races)):
 		y = config['vscale'] * (rec['SECONDS'] - mins)
 		
 		# push collisions downward
-		if config['decollide'] and i > 0 and y - races[r]['results'][i-1]['y'] < config['minvgap']:
-			y = races[r]['results'][i-1]['y'] + config['minvgap']
+		if config['overlap'] > 0 and i > 0 and y - races[r]['results'][i-1]['y'] < config['overlap']:
+			y = races[r]['results'][i-1]['y'] + config['overlap']
 		
 		races[r]['results'][i]['y'] = y
 		
