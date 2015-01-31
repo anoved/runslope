@@ -20,7 +20,8 @@ config = {
 	'cutoff': '1:30:00',
 	'alllinks': True,
 	'curvy': 0,
-	'decollide': True
+	'decollide': True,
+	'underline': False
 }
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS
@@ -151,7 +152,8 @@ for r in range(0, len(races)):
 		
 		# draw result label
 		label =  races[r]['label_format'] % (rec['RANK'], rec['NAME'], rec['TIME'])
-		svg_label = text(label, races[r]['xl'], y-2)
+		y_label = (y - 2 if config['underline'] else y + (config['fontsize']/2))
+		svg_label = text(label, races[r]['xl'], y_label)
 		svg_lgroup.addElement(svg_label)
 		
 		# hacky flag to keep track of linked results for underlining
@@ -171,15 +173,18 @@ for r in range(0, len(races)):
 			# if a match is found, draw a link and stop looking for matches
 			if len(matches) == 1:
 				
-				# underline linked labels
-				underline = line(races[r]['xl'], y, races[r]['xr'], y)
-				svg_llines.addElement(underline)
 				races[r]['results'][i]['LINKED'] = True
 				
-				# backtrack to underline first instance of a linked label
-				if not matches[0]['LINKED']:
-					underline = line(races[p]['xl'], matches[0]['y'], races[p]['xr'], matches[0]['y'])
+				if config['underline']:
+					
+					# underline linked labels
+					underline = line(races[r]['xl'], y, races[r]['xr'], y)
 					svg_llines.addElement(underline)
+					
+					# backtrack to underline first instance of a linked label
+					if not matches[0]['LINKED']:
+						underline = line(races[p]['xl'], matches[0]['y'], races[p]['xr'], matches[0]['y'])
+						svg_llines.addElement(underline)
 				
 				if config['curvy'] > 0:
 					svg_link = path('M ' + str(races[p]['xr']) + ',' + str(matches[0]['y']))
