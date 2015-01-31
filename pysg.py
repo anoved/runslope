@@ -11,14 +11,14 @@ from pysvg.text import *
 from pysvg.builders import StyleBuilder
 
 config = {
-	'vscale': 2,
+	'vscale': 1.5,
 	'fontsize': 9,
-	'linespan': 180,
+	'linespan': 150,
 	'minvgap': 9,
 	'nohooky': False,
 	'scalebars': True,
 	'cutoff': '1:30:00',
-	'alllinks': False,
+	'alllinks': True,
 	'curvy': 50
 }
 
@@ -98,8 +98,8 @@ svg_linkline.setStrokeWidth(1)
 svg_linkline.setStroke('#ccc')
 
 svg_fadeline = StyleBuilder()
-svg_fadeline.setStrokeWidth(0.5)
-svg_fadeline.setStroke('#ddd')
+svg_fadeline.setStrokeWidth(1)
+svg_fadeline.setStroke('#dfdfdf')
 
 svg_labels = g()
 svg_labels.set_style(svg_style.getStyle())
@@ -139,11 +139,11 @@ for r in range(0, len(races)):
 		
 		# draw result label
 		label =  races[r]['label_format'] % (rec['RANK'], rec['NAME'], rec['TIME'])
-		svg_label = text(label, races[r]['xl'], y-1)
+		svg_label = text(label, races[r]['xl'], y-2)
 		svg_lgroup.addElement(svg_label)
 		
-		underline = line(races[r]['xl'], y, races[r]['xr'], y)
-		svg_llines.addElement(underline)
+		# hacky flag to keep track of linked results for underlining
+		races[r]['results'][i]['LINKED'] = False
 		
 		p = r
 		while p > 0:
@@ -158,6 +158,16 @@ for r in range(0, len(races)):
 			
 			# if a match is found, draw a link and stop looking for matches
 			if len(matches) == 1:
+				
+				# underline linked labels
+				underline = line(races[r]['xl'], y, races[r]['xr'], y)
+				svg_llines.addElement(underline)
+				races[r]['results'][i]['LINKED'] = True
+				
+				# backtrack to underline first instance of a linked label
+				if not matches[0]['LINKED']:
+					underline = line(races[p]['xl'], matches[0]['y'], races[p]['xr'], matches[0]['y'])
+					svg_llines.addElement(underline)
 				
 				if config['curvy'] > 0:
 					svg_link = path('M ' + str(races[p]['xr']) + ',' + str(matches[0]['y']))
@@ -184,8 +194,8 @@ for r in range(0, len(races)):
 # scale bars every minute from before first to after last finisher
 if config['scalebars']:
 	svg_scalestyle = StyleBuilder()
-	svg_scalestyle.setStrokeWidth(6)
-	svg_scalestyle.setStroke('#eef')
+	svg_scalestyle.setStrokeWidth(16)
+	svg_scalestyle.setStroke('#f8f8ff')
 	svg_scale = g()
 	svg_scale.set_style(svg_scalestyle.getStyle())
 	start_s = (int(mins)/60) * 60
