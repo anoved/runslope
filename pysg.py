@@ -17,7 +17,8 @@ config = {
 	'nohooky': False,
 	'scalebars': True,
 	'cutoff': '1:30:00',
-	'alllinks': False
+	'alllinks': False,
+	'curvy': 50
 }
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS
@@ -158,8 +159,16 @@ for r in range(0, len(races)):
 			# if a match is found, draw a link and stop looking for matches
 			if len(matches) == 1:
 				
-				# y - 3
-				svg_link = line(races[p]['xr'], matches[0]['y'], races[r]['xl'], y)
+				if config['curvy'] > 0:
+					svg_link = path('M ' + str(races[p]['xr']) + ',' + str(matches[0]['y']))
+					svg_link.setAttribute('fill', 'none')
+					svg_link.appendCubicCurveToPath(
+						races[p]['xr'] + config['curvy'], matches[0]['y'],
+						races[r]['xl'] - config['curvy'], y,
+						races[r]['xl'], y,
+						relative=False)
+				else:
+					svg_link = line(races[p]['xr'], matches[0]['y'], races[r]['xl'], y)
 				
 				if p == r - 1:
 					# links to the immediately previous race are emphasized
