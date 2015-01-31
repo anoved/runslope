@@ -191,22 +191,42 @@ for r in range(0, len(races)):
 	
 	svg_labels.addElement(svg_lgroup)
 
+def Scalebars(smin, smax, xmin, xmax):
+	
+	c_lines = StyleBuilder()
+	c_lines.setStrokeWidth(16)
+	c_lines.setStroke('#f8f8ff')
+	
+	c_times = StyleBuilder()
+	c_times.setFontFamily(fontfamily="monospace")
+	c_times.setFontSize('16px')
+	c_times.setFilling(fill='#d8d8df')
+	
+	g_scale = g()
+	g_scale_lines = g()
+	g_scale_times = g()
+	g_scale_lines.set_style(c_lines.getStyle())
+	g_scale_times.set_style(c_times.getStyle())
+	
+	start = (int(smin) / 60) * 60
+	end = 120 + ((int(smax) / 60) * 60)
+	for s in range(start, end, 60):
+		y = config['vscale'] * (s - smin)
+		sline = line(xmin, y, xmax, y)
+		stime = text(str(s), xmax + 3, y + 7)
+		g_scale_lines.addElement(sline)
+		g_scale_times.addElement(stime)
+	
+	g_scale.addElement(g_scale_lines)
+	g_scale.addElement(g_scale_times)
+	return g_scale
+
 # scale bars every minute from before first to after last finisher
 if config['scalebars']:
-	svg_scalestyle = StyleBuilder()
-	svg_scalestyle.setStrokeWidth(16)
-	svg_scalestyle.setStroke('#f8f8ff')
-	svg_scale = g()
-	svg_scale.set_style(svg_scalestyle.getStyle())
-	start_s = (int(mins)/60) * 60
-	end_s = 120 + ((int(maxs)/60) * 60)
-	for s in range(start_s, end_s, 60):
-		y = config['vscale'] * (s - mins)
-		scaleline = line(0, y, races[-1]['xr'], y)
-		svg_scale.addElement(scaleline)
-	svg_file.addElement(svg_scale)
+	svg_file.addElement(Scalebars(mins, maxs, 0, races[-1]['xr']))
 
 svg_file.addElement(svg_flines)
 svg_file.addElement(svg_llines)
 svg_file.addElement(svg_labels)
 print svg_file.getXML()
+
