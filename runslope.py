@@ -127,8 +127,8 @@ for key in sorted(racekeys):
 	mc_time = len(ts[0]['TIME'])
 	
 	races.append({
-		'wmax_label': mc_rank + 2 + mc_name + 1 + mc_time,
-		'label_format': '%' + str(mc_rank) + 'd. %-' + str(mc_name) + 's %' + str(mc_time) + 's',
+		'wmax_label': mc_rank + 1 + mc_name + 1 + mc_time,
+		'label_format': '%-' + str(mc_rank) + 'd %-' + str(mc_name) + 's %' + str(mc_time) + 's',
 		'results': results
 	})
 
