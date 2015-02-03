@@ -42,7 +42,12 @@ config = {
 	'curvy': 0,
 	
 	# If true, linked labels will be underlined, forming continuous lines
-	'underline': True
+	'underline': True,
+	
+	# CSV field names
+	'KEY_RACE': 'RACE',
+	'KEY_TIME': 'TIME',
+	'KEY_NAME': 'NAME'
 }
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS
@@ -76,7 +81,13 @@ for row in reader:
 	row['SECONDS'] = seconds(row['TIME'])
 	if row['RACE'] not in racekeys:
 		racekeys.append(row['RACE'])
-	data.append(row)
+	rec = {
+		'RACE': row[config['KEY_RACE']],
+		'NAME': row[config['KEY_NAME']],
+		'TIME': row[config['KEY_TIME']],
+		'SECONDS': seconds(row[config['KEY_TIME']]),
+	}
+	data.append(rec)
 
 # optionally take only those that are present for all races
 # (retain record q if there are as many records w/that name as unique racekeys)
@@ -92,14 +103,13 @@ if config['cutoff'] != None:
 mins = min(data, key=lambda q: q['SECONDS'])['SECONDS']
 maxs = max(data, key=lambda q: q['SECONDS'])['SECONDS']
 
-# next, sort by RACE, then SECONDS, then NAME (basically, restore input format)
-# could probably sort and filter at once with one list expression...
-data.sort(key=lambda rec: (rec['RACE'], rec['SECONDS'], rec['NAME']))
+# We assume input is pre-sorted by finishing order (per RACE, of course)
+#data.sort(key=lambda rec: (rec['RACE'], rec['SECONDS'], rec['NAME']))
 
 races = []
 for key in sorted(racekeys):
 	results = filter(lambda result: result['RACE'] == key, data)
-		
+	
 	for n in range(0, len(results)):
 		results[n]['RANK'] = n + 1
 	
