@@ -15,8 +15,10 @@ config = {
 	# Y value scaling. 1 is one vertical pixel per second.
 	'vscale': 2,
 	
-	# Fixed with font pixel size
-	'fontsize': 9,
+	# Fixed width font characteristics
+	'fontface': 'Monospace',
+	'fontheight': 9,
+	'fontwidth': 5.436,
 	
 	# Minimum allowable y overlap. If >0, overlapping labels are pushed down.
 	'overlap': 10,
@@ -133,8 +135,8 @@ for key in sorted(racekeys):
 svg_file = svg()
 
 svg_style = StyleBuilder()
-svg_style.setFontFamily(fontfamily="monospace")
-svg_style.setFontSize('9px')
+svg_style.setFontFamily(fontfamily=config['fontface'])
+svg_style.setFontSize(str(config['fontheight']) + 'px')
 svg_style.setFilling(fill='black')
 
 svg_linkline = StyleBuilder()
@@ -159,12 +161,7 @@ for r in range(0, len(races)):
 	
 	# left and right positions of race results - could calc in earlier loop
 	races[r]['xl'] = (races[r-1]['xr'] + config['linespan'] if r > 0 else 0)
-	races[r]['xr'] = races[r]['xl'] + 0.666 * (races[r]['wmax_label'] * config['fontsize'])
-	# max label char count * font size seems a poor estimate of actual label width
-	# - it's about 1.5 times larger than actual rendered label width.
-	# experiment with http://www.w3.org/TR/SVG/text.html#TextElementTextLengthAttribute
-	#  to specify *intended* label width, and see if the browser/layout engine
-	#  will automatically fudge the text dimensions satisfactorily for alignment
+	races[r]['xr'] = races[r]['xl'] + (races[r]['wmax_label'] * config['fontwidth'])
 	
 	svg_lgroup = g()
 	
@@ -183,7 +180,7 @@ for r in range(0, len(races)):
 		
 		# draw result label
 		label =  races[r]['label_format'] % (rec['RANK'], rec['NAME'], rec['TIME'])
-		y_label = (y - 2 if config['underline'] else y + (config['fontsize']/2))
+		y_label = (y - 2 if config['underline'] else y + (config['fontheight']/2))
 		svg_label = text(label, races[r]['xl'], y_label)
 		svg_lgroup.addElement(svg_label)
 		
@@ -246,7 +243,7 @@ def Scalebars(smin, smax, xmin, xmax):
 	c_lines.setStroke('#f8f8ff')
 	
 	c_times = StyleBuilder()
-	c_times.setFontFamily(fontfamily="monospace")
+	c_times.setFontFamily(fontfamily=config['fontface'])
 	c_times.setFontSize('16px')
 	c_times.setFilling(fill='#d8d8df')
 	
@@ -262,7 +259,7 @@ def Scalebars(smin, smax, xmin, xmax):
 	for s in range(start, end, 60):
 		y = config['vscale'] * (s - smin)
 		sline = line(xmin, y, xmax, y)
-		stime = text(time(s), xmax, y + 6)
+		stime = text(time(s), xmax + 5, y + 6)
 		g_scale_lines.addElement(sline)
 		g_scale_times.addElement(stime)
 	
