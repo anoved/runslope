@@ -148,7 +148,8 @@ svg_linkline.setStroke('#bbb')
 
 svg_fadeline = StyleBuilder()
 svg_fadeline.setStrokeWidth(1)
-svg_fadeline.setStroke('#dfdfdf')
+svg_fadeline.setStroke('#bbb')
+svg_fadeline.setStrokeDashArray('2,4')
 
 svg_labels = g()
 svg_labels.set_style(svg_style.getStyle())
