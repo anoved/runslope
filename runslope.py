@@ -26,6 +26,9 @@ config = {
 	# Pixel spacing between columns
 	'linespan': 200,
 	
+	# Spacing between labels and link lines
+	'gutter': 6,
+	
 	# If true, omit all results for names that did not attend all races
 	'nohooky': False,
 	
@@ -33,7 +36,7 @@ config = {
 	'scalebars': True,
 	
 	# If not None, omit results slower than stated H:MM:SS time
-	'cutoff': '1:30:00',
+	'cutoff': None,
 	
 	# If true, link results even if the runner skipped intervening races
 	# If false, links will only be drawn between consecutive races
@@ -41,7 +44,7 @@ config = {
 	
 	# If 0, links will be drawn as straight lines. Otherwise, gives horizontal
 	# offset of control points from end points for drawing cubic Bezier curves.
-	'curvy': 0,
+	'curvy': 50,
 	
 	# If true, linked labels will be underlined, forming continuous lines
 	'underline': True,
@@ -160,7 +163,7 @@ svg_flines.set_style(svg_fadeline.getStyle())
 for r in range(0, len(races)):
 	
 	# left and right positions of race results - could calc in earlier loop
-	races[r]['xl'] = (races[r-1]['xr'] + config['linespan'] if r > 0 else 0)
+	races[r]['xl'] = (races[r-1]['xr'] + config['linespan'] + (2 * config['gutter']) if r > 0 else 0)
 	races[r]['xr'] = races[r]['xl'] + (races[r]['wmax_label'] * config['fontwidth'])
 	
 	svg_lgroup = g()
@@ -206,24 +209,28 @@ for r in range(0, len(races)):
 				if config['underline']:
 					
 					# underline linked labels
-					underline = line(races[r]['xl'], y, races[r]['xr'], y)
+					underline = line(
+						races[r]['xl'] - config['gutter'], y,
+						races[r]['xr'] + (0 if r + 1 == len(races) else config['gutter']), y)
 					svg_llines.addElement(underline)
 					
 					# backtrack to underline first instance of a linked label
 					if not matches[0]['LINKED']:
-						underline = line(races[p]['xl'], matches[0]['y'], races[p]['xr'], matches[0]['y'])
+						underline = line(
+							races[p]['xl'] - (0 if p == 0 else config['gutter']), matches[0]['y'],
+							races[p]['xr'] + config['gutter'], matches[0]['y'])
 						svg_llines.addElement(underline)
 				
 				if config['curvy'] > 0:
-					svg_link = path('M ' + str(races[p]['xr']) + ',' + str(matches[0]['y']))
+					svg_link = path('M ' + str(races[p]['xr'] + config['gutter']) + ',' + str(matches[0]['y']))
 					svg_link.setAttribute('fill', 'none')
 					svg_link.appendCubicCurveToPath(
-						races[p]['xr'] + config['curvy'], matches[0]['y'],
-						races[r]['xl'] - config['curvy'], y,
-						races[r]['xl'], y,
+						races[p]['xr'] + config['gutter'] + config['curvy'], matches[0]['y'],
+						races[r]['xl'] - config['gutter'] - config['curvy'], y,
+						races[r]['xl'] - config['gutter'], y,
 						relative=False)
 				else:
-					svg_link = line(races[p]['xr'], matches[0]['y'], races[r]['xl'], y)
+					svg_link = line(races[p]['xr'] + config['gutter'], matches[0]['y'], races[r]['xl'] - config['gutter'], y)
 				
 				if p == r - 1:
 					# links to the immediately previous race are emphasized
