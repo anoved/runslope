@@ -47,12 +47,17 @@ config = {
 	'curvy': 60,
 	
 	# If true, linked labels will be underlined, forming continuous lines
-	'underline': False,
+	'underline': True,
 	
 	# CSV field names
 	'KEY_RACE': 'RACE',
 	'KEY_TIME': 'TIME',
-	'KEY_NAME': 'NAME'
+	'KEY_NAME': 'NAME',
+	
+	# Link line style definitions
+	'linkline_style': {'stroke': '#bbb', 'stroke-width': '1'},
+	'weaklink_style': {'stroke': '#bbb', 'stroke-width': '1', 'stroke-dasharray': '2,4'},
+	'underline_style': {'stroke': '#bbb', 'stroke-width': '1'}
 }
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS
@@ -135,31 +140,24 @@ for key in sorted(racekeys):
 		'results': results
 	})
 
-svg_file = svg()
+# SVG styles
 
-svg_style = StyleBuilder()
-svg_style.setFontFamily(fontfamily=config['fontface'])
-svg_style.setFontSize(str(config['fontheight']) + 'px')
-svg_style.setFilling(fill='black')
+s_label = StyleBuilder()
+s_label.setFontFamily(fontfamily=config['fontface'])
+s_label.setFontSize(str(config['fontheight']) + 'px')
+s_label.setFilling(fill='black')
 
-svg_linkline = StyleBuilder()
-svg_linkline.setStrokeWidth(1)
-svg_linkline.setStroke('#bbb')
+# SVG Groups
 
-svg_fadeline = StyleBuilder()
-svg_fadeline.setStrokeWidth(1)
-svg_fadeline.setStroke('#bbb')
-svg_fadeline.setStrokeDashArray('2,4')
-
-svg_labels = g()
-svg_labels.set_style(svg_style.getStyle())
-svg_labels.setAttribute('xml:space', 'preserve')
-
-svg_llines = g()
-svg_llines.set_style(svg_linkline.getStyle())
-
-svg_flines = g()
-svg_flines.set_style(svg_fadeline.getStyle())
+g_label = g()
+g_label.set_style(s_label.getStyle())
+g_label.setAttribute('xml:space', 'preserve')
+g_linkline = g()
+g_linkline.set_style(StyleBuilder(config['linkline_style']).getStyle())
+g_weaklink = g()
+g_weaklink.set_style(StyleBuilder(config['weaklink_style']).getStyle())
+g_underline = g()
+g_underline.set_style(StyleBuilder(config['underline_style']).getStyle())
 
 for r in range(0, len(races)):
 	
@@ -167,7 +165,8 @@ for r in range(0, len(races)):
 	races[r]['xl'] = (races[r-1]['xr'] + config['linespan'] + (2 * config['gutter']) if r > 0 else 0)
 	races[r]['xr'] = races[r]['xl'] + (races[r]['wmax_label'] * config['fontwidth'])
 	
-	svg_lgroup = g()
+	# Group of labels for this race
+	g_racelabels = g()
 	
 	for i in range(0, len(races[r]['results'])):
 		
@@ -185,8 +184,8 @@ for r in range(0, len(races)):
 		# draw result label
 		label =  races[r]['label_format'] % (rec['RANK'], rec['NAME'], rec['TIME'])
 		y_label = (y - 2 if config['underline'] else y + (config['fontheight']/2))
-		svg_label = text(label, races[r]['xl'], y_label)
-		svg_lgroup.addElement(svg_label)
+		t_result = text(label, races[r]['xl'], y_label)
+		g_racelabels.addElement(t_result)
 		
 		# hacky flag to keep track of linked results for underlining
 		races[r]['results'][i]['LINKED'] = False
@@ -208,58 +207,54 @@ for r in range(0, len(races)):
 				yy = matches[0]['y']
 				races[r]['results'][i]['LINKED'] = True
 				
-				# to tag/report the slope of this connection,
-				# compare the connected SECONDS values, *not* the y position.
-				# The y position may be adjusted for legibility, which could
-				# conceivably yield an incorrect comparison.
-				
-				if matches[0]['SECONDS'] < rec['SECONDS']:
-					# got slower
-					color = "#fbb"
-				elif matches[0]['SECONDS'] > rec['SECONDS']:
-					# got faster
-					color = "#bfb"
-				else:
-					color = "#bbb"
-				
 				if config['underline']:
 					
 					# underline linked labels
 					underline = line(
 						races[r]['xl'] - config['gutter'], y,
 						races[r]['xr'] + (0 if r + 1 == len(races) else config['gutter']), y)
-					svg_llines.addElement(underline)
+					g_underline.addElement(underline)
 					
 					# backtrack to underline first instance of a linked label
 					if not matches[0]['LINKED']:
 						underline = line(
 							races[p]['xl'] - (0 if p == 0 else config['gutter']), yy,
 							races[p]['xr'] + config['gutter'], yy)
-						svg_llines.addElement(underline)
+						g_underline.addElement(underline)
 				
 				if config['curvy'] > 0:
-					svg_link = path('M ' + str(races[p]['xr'] + config['gutter']) + ',' + str(yy))
-					svg_link.setAttribute('fill', 'none')
-					svg_link.appendCubicCurveToPath(
+					l_link = path('M ' + str(races[p]['xr'] + config['gutter']) + ',' + str(yy))
+					l_link.setAttribute('fill', 'none')
+					l_link.appendCubicCurveToPath(
 						races[p]['xr'] + config['gutter'] + config['curvy'], yy,
 						races[r]['xl'] - config['gutter'] - config['curvy'], y,
 						races[r]['xl'] - config['gutter'], y,
 						relative=False)
 				else:
-					svg_link = line(races[p]['xr'] + config['gutter'], yy, races[r]['xl'] - config['gutter'], y)
+					l_link = line(races[p]['xr'] + config['gutter'], yy, races[r]['xl'] - config['gutter'], y)
 				
-				svg_link.setAttribute('style','stroke:' + color)
+				# slope tagging
+				#if matches[0]['SECONDS'] < rec['SECONDS']:
+				#	# got slower
+				#	color = "#fbb"
+				#elif matches[0]['SECONDS'] > rec['SECONDS']:
+				#	# got faster
+				#	color = "#bfb"
+				#else:
+				#	color = "#bbb"
+				#svg_link.setAttribute('style','stroke:' + color)
 				
 				if p == r - 1:
 					# links to the immediately previous race are emphasized
-					svg_llines.addElement(svg_link)
+					g_linkline.addElement(l_link)
 				else:
 					# links to earlier races are drawn in a separate group
-					svg_flines.addElement(svg_link)
+					g_weaklink.addElement(l_link)
 				
 				break
 	
-	svg_labels.addElement(svg_lgroup)
+	# Add group of labels for this race to group of all labels
+	g_label.addElement(g_racelabels)
 
 def Scalebars(smin, smax, xmin, xmax):
 	
@@ -292,12 +287,18 @@ def Scalebars(smin, smax, xmin, xmax):
 	g_scale.addElement(g_scale_times)
 	return g_scale
 
-# scale bars every minute from before first to after last finisher
-if config['scalebars']:
-	svg_file.addElement(Scalebars(mins, maxs, 0, races[-1]['xr']))
+s = svg()
 
-svg_file.addElement(svg_flines)
-svg_file.addElement(svg_llines)
-svg_file.addElement(svg_labels)
-print svg_file.getXML()
+if config['scalebars']:
+	s.addElement(Scalebars(mins, maxs, 0, races[-1]['xr']))
+
+s.addElement(g_weaklink)
+s.addElement(g_linkline)
+
+if config['underline']:
+	s.addElement(g_underline)
+
+s.addElement(g_label)
+
+print s.getXML()
 
