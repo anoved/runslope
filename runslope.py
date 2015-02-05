@@ -13,7 +13,7 @@ from pysvg.builders import StyleBuilder
 config = {
 	
 	# Y value scaling. 1 is one vertical pixel per second.
-	'vscale': 2,
+	'vscale': 1.66,
 	
 	# Fixed width font characteristics
 	'fontface': 'Monospace',
@@ -36,7 +36,7 @@ config = {
 	'scalebars': True,
 	
 	# If not None, omit results slower than stated H:MM:SS time
-	'cutoff': None,
+	'cutoff': '1:30:00',
 	
 	# If true, link results even if the runner skipped intervening races
 	# If false, links will only be drawn between consecutive races
@@ -44,10 +44,10 @@ config = {
 	
 	# If 0, links will be drawn as straight lines. Otherwise, gives horizontal
 	# offset of control points from end points for drawing cubic Bezier curves.
-	'curvy': 50,
+	'curvy': 60,
 	
 	# If true, linked labels will be underlined, forming continuous lines
-	'underline': True,
+	'underline': False,
 	
 	# CSV field names
 	'KEY_RACE': 'RACE',
@@ -205,7 +205,22 @@ for r in range(0, len(races)):
 			# if a match is found, draw a link and stop looking for matches
 			if len(matches) == 1:
 				
+				yy = matches[0]['y']
 				races[r]['results'][i]['LINKED'] = True
+				
+				# to tag/report the slope of this connection,
+				# compare the connected SECONDS values, *not* the y position.
+				# The y position may be adjusted for legibility, which could
+				# conceivably yield an incorrect comparison.
+				
+				if matches[0]['SECONDS'] < rec['SECONDS']:
+					# got slower
+					color = "#fbb"
+				elif matches[0]['SECONDS'] > rec['SECONDS']:
+					# got faster
+					color = "#bfb"
+				else:
+					color = "#bbb"
 				
 				if config['underline']:
 					
@@ -218,20 +233,22 @@ for r in range(0, len(races)):
 					# backtrack to underline first instance of a linked label
 					if not matches[0]['LINKED']:
 						underline = line(
-							races[p]['xl'] - (0 if p == 0 else config['gutter']), matches[0]['y'],
-							races[p]['xr'] + config['gutter'], matches[0]['y'])
+							races[p]['xl'] - (0 if p == 0 else config['gutter']), yy,
+							races[p]['xr'] + config['gutter'], yy)
 						svg_llines.addElement(underline)
 				
 				if config['curvy'] > 0:
-					svg_link = path('M ' + str(races[p]['xr'] + config['gutter']) + ',' + str(matches[0]['y']))
+					svg_link = path('M ' + str(races[p]['xr'] + config['gutter']) + ',' + str(yy))
 					svg_link.setAttribute('fill', 'none')
 					svg_link.appendCubicCurveToPath(
-						races[p]['xr'] + config['gutter'] + config['curvy'], matches[0]['y'],
+						races[p]['xr'] + config['gutter'] + config['curvy'], yy,
 						races[r]['xl'] - config['gutter'] - config['curvy'], y,
 						races[r]['xl'] - config['gutter'], y,
 						relative=False)
 				else:
-					svg_link = line(races[p]['xr'] + config['gutter'], matches[0]['y'], races[r]['xl'] - config['gutter'], y)
+					svg_link = line(races[p]['xr'] + config['gutter'], yy, races[r]['xl'] - config['gutter'], y)
+				
+				svg_link.setAttribute('style','stroke:' + color)
 				
 				if p == r - 1:
 					# links to the immediately previous race are emphasized
