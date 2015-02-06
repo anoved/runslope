@@ -13,7 +13,7 @@ from pysvg.builders import StyleBuilder
 config = {
 	
 	# Y value scaling. 1 is one vertical pixel per second.
-	'vscale': 2,
+	'vscale': 1.9,
 	
 	# Fixed width font characteristics
 	'fontface': 'Monospace',
@@ -21,10 +21,10 @@ config = {
 	'fontwidth': 5.436,
 	
 	# Minimum allowable y overlap. If >0, overlapping labels are pushed down.
-	'overlap': 10,
+	'overlap': 11,
 	
 	# Pixel spacing between columns
-	'linespan': 200,
+	'linespan': 180,
 	
 	# Spacing between labels and link lines
 	'gutter': 3,
@@ -38,17 +38,17 @@ config = {
 	# If not None, omit results slower than stated H:MM:SS time
 	'cutoff': '1:30:00',
 	
-	# If true, link results even if the runner skipped intervening races
-	# If false, links will only be drawn between consecutive races
-	'alllinks': True,
+	# If true, all results links including those that skip races will be shown
+	# If false, only links between consecutive race results will be shown
+	'weaklink': False,
 	
 	# If 0, links will be drawn as straight lines. Otherwise, gives horizontal
 	# offset of control points from end points for drawing cubic Bezier curves.
-	'curvy': 60,
+	'curvy': 0,
 	
 	# If 0, linked labels will not be underlined. Otherwise, labels will be
 	# underlined; label baseline will be moved this value above underline.
-	'underline': 2,
+	'underline': 0,
 	
 	# CSV field names
 	'KEY_RACE': 'RACE',
@@ -196,7 +196,7 @@ for r in range(0, len(races)):
 			p -= 1
 			
 			# don't look for name links in earlier races if not requested
-			if (not config['alllinks']) and (p < r - 1):
+			if (not config['weaklink']) and (p < r - 1):
 				break
 			
 			# look for results with the same name in this previous race
