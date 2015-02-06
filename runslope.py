@@ -13,7 +13,7 @@ from pysvg.builders import StyleBuilder
 config = {
 	
 	# Y value scaling. 1 is one vertical pixel per second.
-	'vscale': 1.66,
+	'vscale': 2,
 	
 	# Fixed width font characteristics
 	'fontface': 'Monospace',
@@ -27,7 +27,7 @@ config = {
 	'linespan': 200,
 	
 	# Spacing between labels and link lines
-	'gutter': 6,
+	'gutter': 3,
 	
 	# If true, omit all results for names that did not attend all races
 	'nohooky': False,
@@ -46,8 +46,9 @@ config = {
 	# offset of control points from end points for drawing cubic Bezier curves.
 	'curvy': 60,
 	
-	# If true, linked labels will be underlined, forming continuous lines
-	'underline': True,
+	# If 0, linked labels will not be underlined. Otherwise, labels will be
+	# underlined; label baseline will be moved this value above underline.
+	'underline': 2,
 	
 	# CSV field names
 	'KEY_RACE': 'RACE',
@@ -183,7 +184,7 @@ for r in range(0, len(races)):
 		
 		# draw result label
 		label =  races[r]['label_format'] % (rec['RANK'], rec['NAME'], rec['TIME'])
-		y_label = (y - 2 if config['underline'] else y + (config['fontheight']/2))
+		y_label = (y - config['underline'] if config['underline'] != 0 else y + (config['fontheight']/2))
 		t_result = text(label, races[r]['xl'], y_label)
 		g_racelabels.addElement(t_result)
 		
@@ -207,7 +208,7 @@ for r in range(0, len(races)):
 				yy = matches[0]['y']
 				races[r]['results'][i]['LINKED'] = True
 				
-				if config['underline']:
+				if config['underline'] != 0:
 					
 					# underline linked labels
 					underline = line(
@@ -295,7 +296,7 @@ if config['scalebars']:
 s.addElement(g_weaklink)
 s.addElement(g_linkline)
 
-if config['underline']:
+if config['underline'] != 0:
 	s.addElement(g_underline)
 
 s.addElement(g_label)
