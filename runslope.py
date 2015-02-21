@@ -4,12 +4,16 @@ import sys
 import csv
 import re
 
+import yaml
+import os.path
+
 from pysvg.shape import *
 from pysvg.structure import *
 from pysvg.style import *
 from pysvg.text import *
 from pysvg.builders import StyleBuilder
 
+# Default configuration
 config = {
 	
 	# Y value scaling. 1 is one vertical pixel per second.
@@ -36,7 +40,7 @@ config = {
 	'scalebars': True,
 	
 	# If not None, omit results slower than stated H:MM:SS time
-	'cutoff': '1:30:00',
+	'cutoff': None,
 	
 	# If true, all results links including those that skip races will be shown
 	# If false, only links between consecutive race results will be shown
@@ -44,7 +48,7 @@ config = {
 	
 	# If 0, links will be drawn as straight lines. Otherwise, gives horizontal
 	# offset of control points from end points for drawing cubic Bezier curves.
-	'curvy': 50,
+	'curvy': 0,
 	
 	# If 0, linked labels will not be underlined. Otherwise, labels will be
 	# underlined; label baseline will be moved this value above underline.
@@ -60,6 +64,11 @@ config = {
 	'weaklink_style': {'stroke': '#bbb', 'stroke-width': '2', 'stroke-dasharray': '2,4'},
 	'underline_style': {'stroke': '#bbb', 'stroke-width': '2'}
 }
+
+# Update config with values loaded from config file, if available
+if os.path.isfile("config.yaml"):
+	with open("config.yaml") as config_file:
+		config.update(yaml.safe_load(config_file))
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS
 data = []

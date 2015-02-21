@@ -18,7 +18,7 @@ The focus is on positioning result labels and link lines. Not intended to suppor
 
 ## Prerequisites
 
-Requires [PySVG](https://code.google.com/p/pysvg/).
+Requires [PySVG](https://code.google.com/p/pysvg/) (for output) and [PyYAML](http://pyyaml.org) (for reading optional config file; easily excised).
 
 ## Acknowledgements
 
