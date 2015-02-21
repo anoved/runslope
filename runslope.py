@@ -13,7 +13,7 @@ from pysvg.builders import StyleBuilder
 config = {
 	
 	# Y value scaling. 1 is one vertical pixel per second.
-	'vscale': 1.9,
+	'vscale': 1.8,
 	
 	# Fixed width font characteristics
 	'fontface': 'Monospace',
@@ -21,10 +21,10 @@ config = {
 	'fontwidth': 5.436,
 	
 	# Minimum allowable y overlap. If >0, overlapping labels are pushed down.
-	'overlap': 11,
+	'overlap': 10,
 	
 	# Pixel spacing between columns
-	'linespan': 180,
+	'linespan': 233,
 	
 	# Spacing between labels and link lines
 	'gutter': 3,
@@ -40,11 +40,11 @@ config = {
 	
 	# If true, all results links including those that skip races will be shown
 	# If false, only links between consecutive race results will be shown
-	'weaklink': False,
+	'weaklink': True,
 	
 	# If 0, links will be drawn as straight lines. Otherwise, gives horizontal
 	# offset of control points from end points for drawing cubic Bezier curves.
-	'curvy': 0,
+	'curvy': 50,
 	
 	# If 0, linked labels will not be underlined. Otherwise, labels will be
 	# underlined; label baseline will be moved this value above underline.
@@ -56,9 +56,9 @@ config = {
 	'KEY_NAME': 'NAME',
 	
 	# Link line style definitions
-	'linkline_style': {'stroke': '#bbb', 'stroke-width': '1'},
-	'weaklink_style': {'stroke': '#bbb', 'stroke-width': '1', 'stroke-dasharray': '2,4'},
-	'underline_style': {'stroke': '#bbb', 'stroke-width': '1'}
+	'linkline_style': {'stroke': '#bbb', 'stroke-width': '2'},
+	'weaklink_style': {'stroke': '#bbb', 'stroke-width': '2', 'stroke-dasharray': '2,4'},
+	'underline_style': {'stroke': '#bbb', 'stroke-width': '2'}
 }
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS
