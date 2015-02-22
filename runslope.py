@@ -30,6 +30,10 @@ config = {
 	# Pixel spacing between columns
 	'linespan': 233,
 	
+	# If not None, linespan is adjusted so chart fills a multiple of pagewidth
+	# (Scalebar labels are *not* considered towards 
+	'pagewidth': None,
+	
 	# Spacing between labels and link lines
 	'gutter': 3,
 	
@@ -134,13 +138,15 @@ for key in sorted(racekeys):
 		results[n]['RANK'] = n + 1
 	
 	# result count per race (for char count for column)
+	# longest rank string
 	resultcount = len(results)
 	mc_rank = len("%d" % resultcount)
 	
-	# super clumsiest way to do this
+	# longest name string
 	ns = sorted(results, key=lambda rec: len(rec['NAME']), reverse=True)
 	mc_name = len(ns[0]['NAME'])
 	
+	# longest time string
 	ts = sorted(results, key=lambda rec: (len(rec['TIME']), rec['SECONDS']), reverse=True)
 	mc_time = len(ts[0]['TIME'])
 	
@@ -149,6 +155,19 @@ for key in sorted(racekeys):
 		'label_format': '%-' + str(mc_rank) + 'd %-' + str(mc_name) + 's %' + str(mc_time) + 's',
 		'results': results
 	})
+
+# recalculate linespan to fill target page width (or a multiple thereof)
+if config['pagewidth'] != None:
+	actual_page_width = config['pagewidth']
+	total_label_width = 0
+	for r in races:
+		total_label_width += r['wmax_label'] * config['fontwidth']
+	while total_label_width > actual_page_width:
+		actual_page_width += config['pagewidth']
+	gap_count = len(races) - 1
+	free_space = actual_page_width - total_label_width - (gap_count * 2 * config['gutter'])
+	calc_linespan = free_space / gap_count
+	config['linespan'] = calc_linespan
 
 # SVG styles
 
