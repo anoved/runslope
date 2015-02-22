@@ -152,7 +152,11 @@ for key in sorted(racekeys):
 	
 	races.append({
 		'wmax_label': mc_rank + 1 + mc_name + 1 + mc_time,
-		'label_format': '%-' + str(mc_rank) + 'd %-' + str(mc_name) + 's %' + str(mc_time) + 's',
+		'rank_label': '%-' + str(mc_rank) + 'd',
+		'name_label': '%-' + str(mc_name) + 's',
+		'time_label': '%' + str(mc_time) + 's',
+		'name_xcoffset': (mc_rank + 1) * config['fontwidth'],
+		'time_xcoffset': (mc_rank + 1 + mc_name + 1) * config['fontwidth'],
 		'results': results
 	})
 
@@ -196,6 +200,9 @@ for r in range(0, len(races)):
 	
 	# Group of labels for this race
 	g_racelabels = g()
+	g_ranklabels = g()
+	g_namelabels = g()
+	g_timelabels = g()
 	
 	for i in range(0, len(races[r]['results'])):
 		
@@ -210,11 +217,11 @@ for r in range(0, len(races)):
 		
 		races[r]['results'][i]['y'] = y
 		
-		# draw result label
-		label =  races[r]['label_format'] % (rec['RANK'], rec['NAME'], rec['TIME'])
+		# draw result labels
 		y_label = (y - config['underline'] if config['underline'] != 0 else y + (config['fontheight']/2))
-		t_result = text(label, races[r]['xl'], y_label)
-		g_racelabels.addElement(t_result)
+		g_ranklabels.addElement(text(races[r]['rank_label'] % (rec['RANK']), races[r]['xl'], y_label))
+		g_namelabels.addElement(text(races[r]['name_label'] % (rec['NAME']), races[r]['xl'] + races[r]['name_xcoffset'], y_label))
+		g_timelabels.addElement(text(races[r]['time_label'] % (rec['TIME']), races[r]['xl'] + races[r]['time_xcoffset'], y_label))
 		
 		# hacky flag to keep track of linked results for underlining
 		races[r]['results'][i]['LINKED'] = False
@@ -281,6 +288,11 @@ for r in range(0, len(races)):
 					g_weaklink.addElement(l_link)
 				
 				break
+	
+	# Group label components together
+	g_racelabels.addElement(g_ranklabels)
+	g_racelabels.addElement(g_namelabels)
+	g_racelabels.addElement(g_timelabels)
 	
 	# Add group of labels for this race to group of all labels
 	g_label.addElement(g_racelabels)
