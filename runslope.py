@@ -24,6 +24,10 @@ config = {
 	'fontheight': 9,
 	'fontwidth': 5.436,
 	
+	# dimensions of larger font for scale labels
+	'scalefontheight': 16,
+	'scalefontwidth': 9.6,
+	
 	# Minimum allowable y overlap. If >0, overlapping labels are pushed down.
 	'overlap': 10,
 	
@@ -42,6 +46,9 @@ config = {
 	
 	# If true, create reference lines and label marking every minute
 	'scalebars': True,
+	
+	# If true, place scale bars on left; otherwise, on right.
+	'scaleleft': True,
 	
 	# If not None, omit results slower than stated H:MM:SS time
 	'cutoff': None,
@@ -320,7 +327,12 @@ def Scalebars(smin, smax, xmin, xmax):
 	for s in range(start, end, 60):
 		y = config['vscale'] * (s - smin)
 		sline = line(xmin, y, xmax, y)
-		stime = text(time(s), xmax + 5, y + 6)
+		if config['scaleleft']:
+			# note hard coded assumption of max 7 char time() label
+			lx = xmin - 5 - (7 * config['scalefontwidth'])
+		else:
+			lx = xmax + 5
+		stime = text(time(s), lx, y + 6)
 		g_scale_lines.addElement(sline)
 		g_scale_times.addElement(stime)
 	
