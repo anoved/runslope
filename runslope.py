@@ -59,6 +59,7 @@ config = {
 	
 	# If 0, links will be drawn as straight lines. Otherwise, gives horizontal
 	# offset of control points from end points for drawing cubic Bezier curves.
+	# Expressed as percent of horizontal distance between endpoints (0.5 = 50%)
 	'curvy': 0,
 	
 	# If 0, linked labels will not be underlined. Otherwise, labels will be
@@ -268,9 +269,11 @@ for r in range(0, len(races)):
 				if config['curvy'] > 0:
 					l_link = path('M ' + str(races[p]['xr'] + config['gutter']) + ',' + str(yy))
 					l_link.setAttribute('fill', 'none')
+					linkspan = (races[r]['xl'] - config['gutter']) - (races[p]['xr'] + config['gutter']) 
+					ctrlspan = linkspan * config['curvy']
 					l_link.appendCubicCurveToPath(
-						races[p]['xr'] + config['gutter'] + config['curvy'], yy,
-						races[r]['xl'] - config['gutter'] - config['curvy'], y,
+						races[p]['xr'] + config['gutter'] + ctrlspan, yy,
+						races[r]['xl'] - config['gutter'] - ctrlspan, y,
 						races[r]['xl'] - config['gutter'], y,
 						relative=False)
 				else:
