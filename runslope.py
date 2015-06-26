@@ -75,16 +75,14 @@ config = {
 	'underline_style': {'stroke': '#bbb', 'stroke-width': '2'}
 }
 
-try:
-	import yaml
-	
-	# Update config with values loaded from config file, if available
-	import os.path
-	if os.path.isfile("config.yaml"):
-		with open("config.yaml") as config_file:
-			config.update(yaml.safe_load(config_file))	
-except ImportError:
-	pass
+if len(sys.argv) == 2:
+	try:
+		import yaml
+		import os.path
+		with open(sys.argv[1]) as config_file:
+			config.update(yaml.safe_load(config_file))
+	except ImportError:
+		sys.exit('pyyaml is required to read external config files')
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS, RANK
 data = []
