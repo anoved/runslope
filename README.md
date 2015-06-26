@@ -8,9 +8,9 @@ Reads race results in CSV format from standard input. Prints SVG XML to standard
 
 Expected CSV fields are: `RACE` (arbitrary sequentially-sortable identifiers), `NAME` (assumed unique; may appear multiple times, no more than once per `RACE`), and `TIME` (H:MM:SS format).
 
-Options are set by editing `config` values directly in the code.
+Options are set by directly editing the `config` hash or by giving the path to an equivalent YAML file as the first command line argument.
 
-	./runslope.py <results.csv >slopegraph.svg
+	./runslope.py [config.yaml] <results.csv >slopegraph.svg
 
 ## Scope
 
