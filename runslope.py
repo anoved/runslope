@@ -121,15 +121,16 @@ for row in reader:
 	}
 	data.append(rec)
 
+# discard results slower than cutoff time, if defined ("H:MM:SS" format)
+if config['cutoff'] != None:
+	cutoff = seconds(config['cutoff'])
+	data = filter(lambda q: q['SECONDS'] <= cutoff, data)
+
 # optionally take only those that are present for all races
 # (retain record q if there are as many records w/that name as unique racekeys)
 if config['nohooky']:
 	data = filter(lambda q: len(filter(lambda k: k['NAME'] == q['NAME'], data)) == len(racekeys), data)
 
-# discard results slower than cutoff time, if defined ("H:MM:SS" format)
-if config['cutoff'] != None:
-	cutoff = seconds(config['cutoff'])
-	data = filter(lambda q: q['SECONDS'] <= cutoff, data)
 
 # determine range of times
 mins = min(data, key=lambda q: q['SECONDS'])['SECONDS']
