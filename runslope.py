@@ -4,9 +4,6 @@ import sys
 import csv
 import re
 
-import yaml
-import os.path
-
 from pysvg.shape import *
 from pysvg.structure import *
 from pysvg.style import *
@@ -77,10 +74,16 @@ config = {
 	'underline_style': {'stroke': '#bbb', 'stroke-width': '2'}
 }
 
-# Update config with values loaded from config file, if available
-if os.path.isfile("config.yaml"):
-	with open("config.yaml") as config_file:
-		config.update(yaml.safe_load(config_file))
+try:
+	import yaml
+	
+	# Update config with values loaded from config file, if available
+	import os.path
+	if os.path.isfile("config.yaml"):
+		with open("config.yaml") as config_file:
+			config.update(yaml.safe_load(config_file))	
+except ImportError:
+	pass
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS
 data = []
