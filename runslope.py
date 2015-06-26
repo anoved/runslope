@@ -85,9 +85,10 @@ try:
 except ImportError:
 	pass
 
-# List of dicts with keys: RACE, NAME, TIME, SECONDS
+# List of dicts with keys: RACE, NAME, TIME, SECONDS, RANK
 data = []
 racekeys = []
+racecounts = {}
 
 # convert elapsed time string (eg, "H:MM:SS.S") to seconds
 def seconds(elapsed):
@@ -116,11 +117,14 @@ for row in reader:
 	row['SECONDS'] = seconds(row['TIME'])
 	if row['RACE'] not in racekeys:
 		racekeys.append(row['RACE'])
+		racecounts[row['RACE']] = 0
+	racecounts[row['RACE']] += 1
 	rec = {
 		'RACE': row[config['KEY_RACE']],
 		'NAME': row[config['KEY_NAME']],
 		'TIME': row[config['KEY_TIME']],
 		'SECONDS': seconds(row[config['KEY_TIME']]),
+		'RANK': racecounts[row['RACE']]
 	}
 	data.append(rec)
 
@@ -134,25 +138,16 @@ if config['cutoff'] != None:
 if config['nohooky']:
 	data = filter(lambda q: len(filter(lambda k: k['NAME'] == q['NAME'], data)) == len(racekeys), data)
 
-
 # determine range of times
 mins = min(data, key=lambda q: q['SECONDS'])['SECONDS']
 maxs = max(data, key=lambda q: q['SECONDS'])['SECONDS']
 
-# We assume input is pre-sorted by finishing order (per RACE, of course)
-#data.sort(key=lambda rec: (rec['RACE'], rec['SECONDS'], rec['NAME']))
-
 races = []
 for key in sorted(racekeys):
 	results = filter(lambda result: result['RACE'] == key, data)
-	
-	for n in range(0, len(results)):
-		results[n]['RANK'] = n + 1
-	
-	# result count per race (for char count for column)
-	# longest rank string
-	resultcount = len(results)
-	mc_rank = len("%d" % resultcount)
+		
+	# longest rank string (represented by last place in result set)
+	mc_rank = len(str(results[-1]['RANK']))
 	
 	# longest name string
 	ns = sorted(results, key=lambda rec: len(rec['NAME']), reverse=True)
