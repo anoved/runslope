@@ -38,8 +38,9 @@ config = {
 	# Spacing between labels and link lines
 	'gutter': 3,
 	
-	# If true, omit all results for names that did not attend all races
-	'nohooky': False,
+	# If true, omit all results for names that did not compete in and
+	# finish all races under cutoff time.
+	'strict': False,
 	
 	# If true, create reference lines and label marking every minute
 	'scalebars': True,
@@ -133,9 +134,9 @@ if config['cutoff'] != None:
 	cutoff = seconds(config['cutoff'])
 	data = filter(lambda q: q['SECONDS'] <= cutoff, data)
 
-# optionally take only those that are present for all races
+# in strict attendance mode, only retain results still present for all races 
 # (retain record q if there are as many records w/that name as unique racekeys)
-if config['nohooky']:
+if config['strict']:
 	data = filter(lambda q: len(filter(lambda k: k['NAME'] == q['NAME'], data)) == len(racekeys), data)
 
 # determine range of times
