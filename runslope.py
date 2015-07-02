@@ -16,15 +16,16 @@ config = {
 	# Y value scaling. 1 is one vertical pixel per second.
 	'vscale': 1.8,
 	
-	# Fixed width font characteristics
-	'fontface': 'Monospace',
-	'fontheight': 9,
-	'fontwidth': 5.436,
+	# Result label text
+	'label_style': {'fill': 'black', 'font-family': 'Monospace'},
+	'label_font_height': 9,
+	'label_font_width': 5.436,
 	
-	# dimensions of larger font for scale labels
-	'scalefontheight': 16,
-	'scalefontwidth': 9.6,
-	
+	# Scale bar label text
+	'scale_style': {'fill': '#d8d8df', 'font-family': 'Monospace'},
+	'scale_font_height': 16,
+	'scale_font_width': 9.6,
+
 	# Minimum allowable y overlap. If >0, overlapping labels are pushed down.
 	'overlap': 10,
 	
@@ -72,7 +73,8 @@ config = {
 	# Link line style definitions
 	'linkline_style': {'stroke': '#bbb', 'stroke-width': '2'},
 	'weaklink_style': {'stroke': '#bbb', 'stroke-width': '2', 'stroke-dasharray': '2,4'},
-	'underline_style': {'stroke': '#bbb', 'stroke-width': '2'}
+	'underline_style': {'stroke': '#bbb', 'stroke-width': '2'},
+	'scaleline_style': {'stroke': '#f8f8ff', 'stroke-width': '16'},
 }
 
 if len(sys.argv) == 2:
@@ -161,8 +163,8 @@ for key in sorted(racekeys):
 		'rank_label': '%-' + str(mc_rank) + 'd',
 		'name_label': '%-' + str(mc_name) + 's',
 		'time_label': '%' + str(mc_time) + 's',
-		'name_xcoffset': (mc_rank + 1) * config['fontwidth'],
-		'time_xcoffset': (mc_rank + 1 + mc_name + 1) * config['fontwidth'],
+		'name_xcoffset': (mc_rank + 1) * config['label_font_width'],
+		'time_xcoffset': (mc_rank + 1 + mc_name + 1) * config['label_font_width'],
 		'results': results
 	})
 
@@ -171,7 +173,7 @@ if config['pagewidth'] != None:
 	actual_page_width = config['pagewidth']
 	total_label_width = 0
 	for r in races:
-		total_label_width += r['wmax_label'] * config['fontwidth']
+		total_label_width += r['wmax_label'] * config['label_font_width']
 	while total_label_width > actual_page_width:
 		actual_page_width += config['pagewidth']
 	gap_count = len(races) - 1
@@ -181,10 +183,8 @@ if config['pagewidth'] != None:
 
 # SVG styles
 
-s_label = StyleBuilder()
-s_label.setFontFamily(fontfamily=config['fontface'])
-s_label.setFontSize(str(config['fontheight']) + 'px')
-s_label.setFilling(fill='black')
+s_label = StyleBuilder(config['label_style'])
+s_label.setFontSize(str(config['label_font_height']) + 'px')
 
 # SVG Groups
 
@@ -202,7 +202,7 @@ for r in range(0, len(races)):
 	
 	# left and right positions of race results - could calc in earlier loop
 	races[r]['xl'] = (races[r-1]['xr'] + config['linespan'] + (2 * config['gutter']) if r > 0 else 0)
-	races[r]['xr'] = races[r]['xl'] + (races[r]['wmax_label'] * config['fontwidth'])
+	races[r]['xr'] = races[r]['xl'] + (races[r]['wmax_label'] * config['label_font_width'])
 	
 	# Group of labels for this race
 	g_racelabels = g()
@@ -224,7 +224,7 @@ for r in range(0, len(races)):
 		races[r]['results'][i]['y'] = y
 		
 		# draw result labels
-		y_label = (y - config['underline'] if config['underline'] != 0 else y + (config['fontheight']/2))
+		y_label = (y - config['underline'] if config['underline'] != 0 else y + (config['label_font_height']/2))
 		g_ranklabels.addElement(text(races[r]['rank_label'] % (rec['RANK']), races[r]['xl'], y_label))
 		g_namelabels.addElement(text(races[r]['name_label'] % (rec['NAME']), races[r]['xl'] + races[r]['name_xcoffset'], y_label))
 		g_timelabels.addElement(text(races[r]['time_label'] % (rec['TIME']), races[r]['xl'] + races[r]['time_xcoffset'], y_label))
@@ -306,21 +306,17 @@ for r in range(0, len(races)):
 	g_label.addElement(g_racelabels)
 
 def Scalebars(smin, smax, xmin, xmax):
-	
-	c_lines = StyleBuilder()
-	c_lines.setStrokeWidth(16)
-	c_lines.setStroke('#f8f8ff')
-	
-	c_times = StyleBuilder()
-	c_times.setFontFamily(fontfamily=config['fontface'])
-	c_times.setFontSize('16px')
-	c_times.setFilling(fill='#d8d8df')
+		
+	c_lines = StyleBuilder(config['scaleline_style'])
+	c_times = StyleBuilder(config['scale_style'])
+	c_times.setFontSize(str(config['scale_font_height']) + 'px')
 	
 	g_scale = g()
 	g_scale_lines = g()
 	g_scale_times = g()
 	g_scale_lines.set_style(c_lines.getStyle())
 	g_scale_times.set_style(c_times.getStyle())
+	
 	g_scale_times.setAttribute('xml:space', 'preserve')
 	
 	start = (int(smin) / 60) * 60
@@ -330,7 +326,10 @@ def Scalebars(smin, smax, xmin, xmax):
 		sline = line(xmin, y, xmax, y)
 		if config['scaleleft']:
 			# note hard coded assumption of max 7 char time() label
-			lx = xmin - 5 - (7 * config['scalefontwidth'])
+			# that would be fine, with a 5px margin between the end of
+			# the label and the start of the scale bar, but some issue
+			# with character width mis-estimation is bungling the spacing
+			lx = xmin - 5 - (7 * config['scale_font_width'])
 		else:
 			lx = xmax + 5
 		stime = text(time(s), lx, y + 6)
@@ -355,4 +354,3 @@ if config['underline'] != 0:
 s.addElement(g_label)
 
 print s.getXML()
-
