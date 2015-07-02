@@ -319,16 +319,22 @@ def Scalebars(smin, smax, xmin, xmax):
 	
 	g_scale_times.setAttribute('xml:space', 'preserve')
 	
+	# seconds value of largest minute smaller than first time
 	start = (int(smin) / 60) * 60
-	end = 120 + ((int(smax) / 60) * 60)
+	
+	# seconds value of smallest minute larger than last time
+	end = 60 + ((int(smax) / 60) * 60)
+	
+	# if the max time wasn't exactly on a minute interval, add one more
+	if end < smax + 60:
+		end += 60;
+	
+	# one scale bar for each minute in the range, including last
 	for s in range(start, end, 60):
 		y = config['vscale'] * (s - smin)
 		sline = line(xmin, y, xmax, y)
 		if config['scaleleft']:
-			# note hard coded assumption of max 7 char time() label
-			# that would be fine, with a 5px margin between the end of
-			# the label and the start of the scale bar, but some issue
-			# with character width mis-estimation is bungling the spacing
+			# note hard coded expectation of 7 char max scale label
 			lx = xmin - 5 - (7 * config['scale_font_width'])
 		else:
 			lx = xmax + 5
@@ -343,7 +349,11 @@ def Scalebars(smin, smax, xmin, xmax):
 s = svg()
 
 if config['scalebars']:
-	s.addElement(Scalebars(mins, maxs, 0, races[-1]['xr']))
+	if config['cutoff'] == None:
+		scalemax = maxs
+	else:
+		scalemax = seconds(config['cutoff'])
+	s.addElement(Scalebars(mins, scalemax, 0, races[-1]['xr']))
 
 s.addElement(g_weaklink)
 s.addElement(g_linkline)
