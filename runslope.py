@@ -80,11 +80,14 @@ config = {
 if len(sys.argv) == 2:
 	try:
 		import yaml
-		import os.path
 		with open(sys.argv[1]) as config_file:
 			config.update(yaml.safe_load(config_file))
 	except ImportError:
 		sys.exit('pyyaml is required to read external config files')
+
+#import yaml
+#print yaml.dump(config)
+#exit()
 
 # List of dicts with keys: RACE, NAME, TIME, SECONDS, RANK
 data = []
