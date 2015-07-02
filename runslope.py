@@ -22,7 +22,7 @@ config = {
 	'label_font_width': 5.436,
 	
 	# Scale bar label text
-	'scale_style': {'fill': '#d8d8df', 'font-family': 'Monospace'},
+	'scale_style': {'fill': '#b8b8bf', 'font-family': 'Monospace'},
 	'scale_font_height': 16,
 	'scale_font_width': 9.6,
 
@@ -74,7 +74,7 @@ config = {
 	'linkline_style': {'stroke': '#bbb', 'stroke-width': '2'},
 	'weaklink_style': {'stroke': '#bbb', 'stroke-width': '2', 'stroke-dasharray': '2,4'},
 	'underline_style': {'stroke': '#bbb', 'stroke-width': '2'},
-	'scaleline_style': {'stroke': '#f8f8ff', 'stroke-width': '16'},
+	'scaleline_style': {'stroke': '#eee', 'stroke-width': '16'},
 }
 
 if len(sys.argv) == 2:
