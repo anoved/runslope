@@ -194,7 +194,8 @@ if config['pagewidth'] != None:
 	while total_label_width > actual_page_width:
 		actual_page_width += config['pagewidth']
 	gap_count = len(races) - 1
-	free_space = actual_page_width - total_label_width - (gap_count * 2 * config['gutter'])
+	scale_label_width = (7 * config['scale_font_width']) + 5
+	free_space = actual_page_width - total_label_width - scale_label_width - (gap_count * 2 * config['gutter'])
 	calc_linespan = free_space / gap_count
 	config['linespan'] = calc_linespan
 
