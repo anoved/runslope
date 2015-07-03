@@ -142,14 +142,15 @@ if config['cutoff'] != None:
 if config['strict']:
 	data = filter(lambda q: len(filter(lambda k: k['NAME'] == q['NAME'], data)) == len(racekeys), data)
 
-# determine range of times
+# determine range of remaining times
 mins = min(data, key=lambda q: q['SECONDS'])['SECONDS']
 maxs = max(data, key=lambda q: q['SECONDS'])['SECONDS']
 
+# scan results to determine column widths and corresponding format strings
 races = []
 for key in sorted(racekeys):
 	results = filter(lambda result: result['RACE'] == key, data)
-		
+	
 	# longest rank string (represented by last place in result set)
 	mc_rank = len(str(results[-1]['RANK']))
 	
@@ -162,12 +163,25 @@ for key in sorted(racekeys):
 	mc_time = len(ts[0]['TIME'])
 	
 	races.append({
+		# maximum width of result labels for this race
 		'wmax_label': mc_rank + 1 + mc_name + 1 + mc_time,
+		
+		# rank format string (fit to maximum)
 		'rank_label': '%-' + str(mc_rank) + 'd',
+		
+		# name format string (fit to maximum)
 		'name_label': '%-' + str(mc_name) + 's',
-		'time_label': '%' + str(mc_time) + 's',
+		
+		# time format string (fit to maximum)
+		'time_label':  '%' + str(mc_time) + 's',
+		
+		# x offset for name, relative to rank start x
 		'name_xcoffset': (mc_rank + 1) * config['label_font_width'],
+		
+		# x offset for time, relative to rank start x
 		'time_xcoffset': (mc_rank + 1 + mc_name + 1) * config['label_font_width'],
+		
+		# subset of actual results for this race
 		'results': results
 	})
 
@@ -203,8 +217,12 @@ g_underline.set_style(StyleBuilder(config['underline_style']).getStyle())
 
 for r in range(0, len(races)):
 	
-	# left and right positions of race results - could calc in earlier loop
+	# left edge of first label column is at x = 0;
+	# left edge of subsequent label columns is offset from right edge of previous column
+	# by width of connector line plus width of two gutters (either side of connector).
 	races[r]['xl'] = (races[r-1]['xr'] + config['linespan'] + (2 * config['gutter']) if r > 0 else 0)
+	
+	# right edge of label column offset maximum label width from left edge
 	races[r]['xr'] = races[r]['xl'] + (races[r]['wmax_label'] * config['label_font_width'])
 	
 	# Group of labels for this race
@@ -213,21 +231,27 @@ for r in range(0, len(races)):
 	g_namelabels = g()
 	g_timelabels = g()
 	
+	# plot all results for this race
 	for i in range(0, len(races[r]['results'])):
 		
 		rec = races[r]['results'][i]
 		
-		# value we have to position
+		# multiply value by vertical scale to obtain initial y position
 		y = config['vscale'] * (rec['SECONDS'] - mins)
 		
 		# push collisions downward
 		if config['overlap'] > 0 and i > 0 and y - races[r]['results'][i-1]['y'] < config['overlap']:
 			y = races[r]['results'][i-1]['y'] + config['overlap']
 		
+		# cache plotted y position for later use in drawing link lines
 		races[r]['results'][i]['y'] = y
 		
-		# draw result labels
+		# note: connector line endpoints mark actual y value.
+		# label baseline sits above y value if underlined; otherwise,
+		# label baseline moved below y value to vertically center label on y 
 		y_label = (y - config['underline'] if config['underline'] != 0 else y + (config['label_font_height']/2))
+		
+		# generate result labels and place on drawing
 		g_ranklabels.addElement(text(races[r]['rank_label'] % (rec['RANK']), races[r]['xl'], y_label))
 		g_namelabels.addElement(text(races[r]['name_label'] % (rec['NAME']), races[r]['xl'] + races[r]['name_xcoffset'], y_label))
 		g_timelabels.addElement(text(races[r]['time_label'] % (rec['TIME']), races[r]['xl'] + races[r]['time_xcoffset'], y_label))
@@ -235,11 +259,12 @@ for r in range(0, len(races)):
 		# hacky flag to keep track of linked results for underlining
 		races[r]['results'][i]['LINKED'] = False
 		
+		# link line loop; r is the current race, p iterates back through preceding races
 		p = r
 		while p > 0:
 			p -= 1
 			
-			# don't look for name links in earlier races if not requested
+			# if weaklinks are disabled, disregard races prior to immediately preceding
 			if (not config['weaklink']) and (p < r - 1):
 				break
 			
@@ -249,9 +274,11 @@ for r in range(0, len(races)):
 			# if a match is found, draw a link and stop looking for matches
 			if len(matches) == 1:
 				
+				# yy is y position of the found match; tag it as linked
 				yy = matches[0]['y']
 				races[r]['results'][i]['LINKED'] = True
 				
+				# optionally underline result labels
 				if config['underline'] != 0:
 					
 					# underline linked labels
@@ -267,6 +294,7 @@ for r in range(0, len(races)):
 							races[p]['xr'] + config['gutter'], yy)
 						g_underline.addElement(underline)
 				
+				# draw the link line
 				if config['curvy'] > 0:
 					l_link = path('M ' + str(races[p]['xr'] + config['gutter']) + ',' + str(yy))
 					l_link.setAttribute('fill', 'none')
@@ -280,17 +308,15 @@ for r in range(0, len(races)):
 				else:
 					l_link = line(races[p]['xr'] + config['gutter'], yy, races[r]['xl'] - config['gutter'], y)
 				
-				# slope tagging
+				# logic to categorize links by change type (unused)
 				#if matches[0]['SECONDS'] < rec['SECONDS']:
 				#	# got slower
-				#	color = "#fbb"
 				#elif matches[0]['SECONDS'] > rec['SECONDS']:
 				#	# got faster
-				#	color = "#bfb"
 				#else:
-				#	color = "#bbb"
-				#svg_link.setAttribute('style','stroke:' + color)
+				#	# no change
 				
+				# apply styles to link lines
 				if p == r - 1:
 					# links to the immediately previous race are emphasized
 					g_linkline.addElement(l_link)
