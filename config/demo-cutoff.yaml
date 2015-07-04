@@ -1,0 +1,16 @@
+curvy: 0.5
+cutoff: '38:00'
+strict: false
+weaklink: true
+
+pagewidth: 1000
+gutter: 3
+label_font_width: 6.25
+scale_font_width: 11
+linespan: 100
+overlap: 13
+underline: 3
+vscale: 1.1
+scaleleft: false
+
+
