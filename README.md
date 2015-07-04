@@ -48,7 +48,7 @@ Here is an example using the first six finishers from each race in a four-race s
 "4","Aaron Perry","39:16"
 ```
 
-The results for each race in the series are shown in columns from left to right. Finishing time is visually represented by the vertical distribution of result labels; the same scale is used for all races, facilitating comparison of individual and overall results. Solid lines connect an individual's results from consecutive races; dotted lines connect results 
+The results for each race in the series are shown in columns from left to right. Finishing time is visually represented by the vertical distribution of result labels; the same scale is used for all races, facilitating comparison of individual and overall results. Solid lines connect an individual's results from consecutive races; dotted lines span skipped races to connect returning runners with their earlier results.
 
 ```yaml
 cutoff: null
@@ -59,7 +59,7 @@ curve: 0.5
 
 ![demo](images/top6.png)
 
-To focus attention on consecutive finishes, hide dotted lines between disjunct results by disabling `weaklink`:
+To focus attention on consecutive finishes, hide dotted lines between disjunct results:
 
 ```yaml
 weaklink: false
