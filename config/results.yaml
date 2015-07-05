@@ -1,0 +1,41 @@
+# Result Subset
+# Using 1:11:00 for strict mode
+cutoff: '1:13:00'
+strict: false
+
+# Page Layout
+pagewidth: 1400
+linespan: null
+vscale: 1.8
+
+# Layout Tweaks
+overlap: 11
+underline: 2
+gutter: 3
+
+# Connector Lines
+curvy: 0.3
+weaklink: true
+linkline_style: {stroke: '#bbb', stroke-width: '2'}
+underline_style: {stroke: '#bbb', stroke-width: '2'}
+weaklink_style: {stroke: '#bbb', stroke-dasharray: '2,4', stroke-width: '2'}
+
+# Scale Bars
+scalebars: true
+scaleleft: false
+scaleline_style: {stroke: '#eee', stroke-width: '16'}
+
+# Result Label Text
+label_font_height: 9
+label_font_width: 6.25
+label_style: {fill: black, font-family: Monospace}
+
+# Scale Label Text
+scale_font_height: 16
+scale_font_width: 11
+scale_style: {fill: '#b8b8bf', font-family: Monospace}
+
+# CSV Fields
+KEY_NAME: NAME
+KEY_RACE: RACE
+KEY_TIME: TIME
