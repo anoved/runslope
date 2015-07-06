@@ -107,7 +107,7 @@ Legibility is maintained by shifting close result labels down until they don't o
 
 Developed mainly to visualize the results of my running club's [2015 "January Freeze" 10k series](http://triplecitiesrunnersclub.org/y2015/januaryfreeze.html). Check out the [complete](pdf/results-poster.pdf) and [selected](pdf/results-strict-poster.pdf) results posters.
 
-![results poster image](images/results-poster-thumb.png) ![selected results poster image](images/results-strict-poster-thumb.png)
+[![results poster image](images/results-poster-thumb.png)](images/results-poster-72dpi.png) [![selected results poster image](images/results-strict-poster-thumb.png)](images/results-strict-poster-72dpi.png)
 
 ## Prerequisites
 
