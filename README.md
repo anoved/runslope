@@ -103,6 +103,10 @@ underline: 0
 
 Legibility is maintained by shifting close result labels down until they don't overlap. As a result, dense packs of finishers will inevitably be plotted inaccurately. This can be mitigated by adjusting the overall `vscale` (higher values spread out the results more) or, to some extent, by reducing the `overlap` margin.
 
+## Poster Project
+
+Developed mainly to visualize the results of my running club's [2015 "January Freeze" 10k series](http://triplecitiesrunnersclub.org/y2015/januaryfreeze.html). Check out the [complete](pdf/results-poster.pdf) and [selected](pdf/results-strict-poster.pdf) results posters.
+
 ## Prerequisites
 
 Requires [PySVG](https://code.google.com/p/pysvg/) (for output) and [PyYAML](http://pyyaml.org) (for reading optional config file; easily excised).
