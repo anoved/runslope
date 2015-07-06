@@ -107,6 +107,8 @@ Legibility is maintained by shifting close result labels down until they don't o
 
 Developed mainly to visualize the results of my running club's [2015 "January Freeze" 10k series](http://triplecitiesrunnersclub.org/y2015/januaryfreeze.html). Check out the [complete](pdf/results-poster.pdf) and [selected](pdf/results-strict-poster.pdf) results posters.
 
+![results posters image](images/both-posters-72dpi.png)
+
 ## Prerequisites
 
 Requires [PySVG](https://code.google.com/p/pysvg/) (for output) and [PyYAML](http://pyyaml.org) (for reading optional config file; easily excised).
