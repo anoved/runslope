@@ -123,11 +123,27 @@ for row in reader:
 		racekeys.append(row['RACE'])
 		racecounts[row['RACE']] = 0
 	racecounts[row['RACE']] += 1
+	
+	# hard coded hack case for rw2015
+	if row['RACE'] == '1':
+		sec_hack = 2 * seconds(row[config['KEY_TIME']])
+		time_hack = row['TIME']
+	else:
+		firstlap = filter(lambda q: q['NAME'] == row['NAME'] and q['RACE'] == '1', data)
+		sec_hack = firstlap[0]['SECONDS']/2 + seconds(row[config['KEY_TIME']])
+		time_hack = row['TIME'] + " (" + time(sec_hack) + ")"
+	
+	
+	#if race == 1:
+	#	seconds = 2 * seconds(row[config['KEY_TIME']])
+	#else if race == 2:
+	#	seconds = data("race:1,name:name").seconds + seconds(row[config['KEY_TIME']])
+	
 	rec = {
 		'RACE': row[config['KEY_RACE']],
 		'NAME': row[config['KEY_NAME']],
-		'TIME': row[config['KEY_TIME']],
-		'SECONDS': seconds(row[config['KEY_TIME']]),
+		'TIME': time_hack,
+		'SECONDS': sec_hack,
 		'RANK': racecounts[row['RACE']]
 	}
 	data.append(rec)
@@ -145,6 +161,12 @@ if config['strict']:
 # determine range of remaining times
 mins = min(data, key=lambda q: q['SECONDS'])['SECONDS']
 maxs = max(data, key=lambda q: q['SECONDS'])['SECONDS']
+
+#data.sort(key=lambda rec: (rec['RACE'], rec['SECONDS']))
+# could recalculate rank within race now that it's sorted... not done normally
+# because rank is intended to reflect rank prior to any results filtered out
+# but in the case of RW2015 laps, we know there are no filtered results, so
+# we can recalculate ranks without mangling result count.
 
 # scan results to determine column widths and corresponding format strings
 races = []
@@ -335,7 +357,7 @@ for r in range(0, len(races)):
 	# Add group of labels for this race to group of all labels
 	g_label.addElement(g_racelabels)
 
-def Scalebars(smin, smax, xmin, xmax):
+def Scalebars(smin, smax, xmin, xmax, halfhack):
 		
 	c_lines = StyleBuilder(config['scaleline_style'])
 	c_times = StyleBuilder(config['scale_style'])
@@ -363,11 +385,14 @@ def Scalebars(smin, smax, xmin, xmax):
 	for s in range(start, end, 60):
 		y = config['vscale'] * (s - smin)
 		sline = line(xmin, y, xmax, y)
-		if config['scaleleft']:
+		if config['scaleleft'] or halfhack:
 			# note hard coded expectation of 7 char max scale label
 			lx = xmin - 5 - (7 * config['scale_font_width'])
 		else:
 			lx = xmax + 5
+		# seconds * 2 to put label results by final time
+		if halfhack:
+			s = s / 2
 		stime = text(time(s), lx, y + 6)
 		g_scale_lines.addElement(sline)
 		g_scale_times.addElement(stime)
@@ -383,7 +408,8 @@ if config['scalebars']:
 		scalemax = maxs
 	else:
 		scalemax = seconds(config['cutoff'])
-	s.addElement(Scalebars(mins, scalemax, 0, races[-1]['xr']))
+	s.addElement(Scalebars(mins, scalemax, 0, races[-1]['xr'], False))
+	s.addElement(Scalebars(mins, scalemax, 0, races[-1]['xr'], True))
 
 s.addElement(g_weaklink)
 s.addElement(g_linkline)
