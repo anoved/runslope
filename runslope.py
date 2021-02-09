@@ -206,14 +206,14 @@ s_label.setFontSize(str(config['label_font_height']) + 'px')
 
 # SVG Groups
 
-g_label = g()
+g_label = G()
 g_label.set_style(s_label.getStyle())
 g_label.setAttribute('xml:space', 'preserve')
-g_linkline = g()
+g_linkline = G()
 g_linkline.set_style(StyleBuilder(config['linkline_style']).getStyle())
-g_weaklink = g()
+g_weaklink = G()
 g_weaklink.set_style(StyleBuilder(config['weaklink_style']).getStyle())
-g_underline = g()
+g_underline = G()
 g_underline.set_style(StyleBuilder(config['underline_style']).getStyle())
 
 for r in range(0, len(races)):
@@ -227,10 +227,10 @@ for r in range(0, len(races)):
 	races[r]['xr'] = races[r]['xl'] + (races[r]['wmax_label'] * config['label_font_width'])
 	
 	# Group of labels for this race
-	g_racelabels = g()
-	g_ranklabels = g()
-	g_namelabels = g()
-	g_timelabels = g()
+	g_racelabels = G()
+	g_ranklabels = G()
+	g_namelabels = G()
+	g_timelabels = G()
 	
 	# plot all results for this race
 	for i in range(0, len(races[r]['results'])):
@@ -253,9 +253,9 @@ for r in range(0, len(races)):
 		y_label = (y - config['underline'] if config['underline'] != 0 else y + (config['label_font_height']/2))
 		
 		# generate result labels and place on drawing
-		g_ranklabels.addElement(text(races[r]['rank_label'] % (rec['RANK']), races[r]['xl'], y_label))
-		g_namelabels.addElement(text(races[r]['name_label'] % (rec['NAME']), races[r]['xl'] + races[r]['name_xcoffset'], y_label))
-		g_timelabels.addElement(text(races[r]['time_label'] % (rec['TIME']), races[r]['xl'] + races[r]['time_xcoffset'], y_label))
+		g_ranklabels.addElement(Text(races[r]['rank_label'] % (rec['RANK']), races[r]['xl'], y_label))
+		g_namelabels.addElement(Text(races[r]['name_label'] % (rec['NAME']), races[r]['xl'] + races[r]['name_xcoffset'], y_label))
+		g_timelabels.addElement(Text(races[r]['time_label'] % (rec['TIME']), races[r]['xl'] + races[r]['time_xcoffset'], y_label))
 		
 		# hacky flag to keep track of linked results for underlining
 		races[r]['results'][i]['LINKED'] = False
@@ -283,21 +283,21 @@ for r in range(0, len(races)):
 				if config['underline'] != 0:
 					
 					# underline linked labels
-					underline = line(
+					underline = Line(
 						races[r]['xl'] - config['gutter'], y,
 						races[r]['xr'] + (0 if r + 1 == len(races) else config['gutter']), y)
 					g_underline.addElement(underline)
 					
 					# backtrack to underline first instance of a linked label
 					if not matches[0]['LINKED']:
-						underline = line(
+						underline = Line(
 							races[p]['xl'] - (0 if p == 0 else config['gutter']), yy,
 							races[p]['xr'] + config['gutter'], yy)
 						g_underline.addElement(underline)
 				
 				# draw the link line
 				if config['curvy'] > 0:
-					l_link = path('M ' + str(races[p]['xr'] + config['gutter']) + ',' + str(yy))
+					l_link = Path('M ' + str(races[p]['xr'] + config['gutter']) + ',' + str(yy))
 					l_link.setAttribute('fill', 'none')
 					linkspan = (races[r]['xl'] - config['gutter']) - (races[p]['xr'] + config['gutter']) 
 					ctrlspan = linkspan * config['curvy']
@@ -307,7 +307,7 @@ for r in range(0, len(races)):
 						races[r]['xl'] - config['gutter'], y,
 						relative=False)
 				else:
-					l_link = line(races[p]['xr'] + config['gutter'], yy, races[r]['xl'] - config['gutter'], y)
+					l_link = Line(races[p]['xr'] + config['gutter'], yy, races[r]['xl'] - config['gutter'], y)
 				
 				# logic to categorize links by change type (unused)
 				#if matches[0]['SECONDS'] < rec['SECONDS']:
@@ -341,9 +341,9 @@ def Scalebars(smin, smax, xmin, xmax):
 	c_times = StyleBuilder(config['scale_style'])
 	c_times.setFontSize(str(config['scale_font_height']) + 'px')
 	
-	g_scale = g()
-	g_scale_lines = g()
-	g_scale_times = g()
+	g_scale = G()
+	g_scale_lines = G()
+	g_scale_times = G()
 	g_scale_lines.set_style(c_lines.getStyle())
 	g_scale_times.set_style(c_times.getStyle())
 	
@@ -362,13 +362,13 @@ def Scalebars(smin, smax, xmin, xmax):
 	# one scale bar for each minute in the range, including last
 	for s in range(start, end, 60):
 		y = config['vscale'] * (s - smin)
-		sline = line(xmin, y, xmax, y)
+		sline = Line(xmin, y, xmax, y)
 		if config['scaleleft']:
 			# note hard coded expectation of 7 char max scale label
 			lx = xmin - 5 - (7 * config['scale_font_width'])
 		else:
 			lx = xmax + 5
-		stime = text(time(s), lx, y + 6)
+		stime = Text(time(s), lx, y + 6)
 		g_scale_lines.addElement(sline)
 		g_scale_times.addElement(stime)
 	
@@ -376,7 +376,7 @@ def Scalebars(smin, smax, xmin, xmax):
 	g_scale.addElement(g_scale_times)
 	return g_scale
 
-s = svg()
+s = Svg()
 
 if config['scalebars']:
 	if config['cutoff'] == None:

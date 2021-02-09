@@ -113,6 +113,11 @@ Developed mainly to visualize the results of my running club's [2015 "January Fr
 
 Requires [PySVG](https://code.google.com/p/pysvg/) (for output) and [PyYAML](http://pyyaml.org) (for reading optional config file; easily excised).
 
+
+	sudo apt install python-pip
+	pip install pysvg
+	pip install pyyaml
+
 ## Acknowledgements
 
 Modeled after Ben Concutere's [sg](https://github.com/concutere/sg).
